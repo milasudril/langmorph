@@ -1,0 +1,4 @@
+{
+	 "target":{"name":"wordgen"}
+	,"dependencies":[{"ref":"wordgen.o","rel":"implementation"}]
+}
