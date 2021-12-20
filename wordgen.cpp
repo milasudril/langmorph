@@ -192,7 +192,7 @@ auto collect_groups(std::set<Letter> const& vowels, std::set<Letter> const& cons
 					case letter_class::junk:
 						break;
 				}
-				current_group.clear();
+				current_group = *cp;
 			}
 
 			prev_class = letter_class;
@@ -215,7 +215,7 @@ int main()
 	std::for_each(std::begin(res.first), std::end(res.first), [](auto const& item) {
 		printf("%s: %zu\n", item.first.c_str(), item.second);
 	});
-
+	puts("=============================");
 	std::for_each(std::begin(res.second), std::end(res.second), [](auto const& item) {
 		printf("%s: %zu\n", item.first.c_str(), item.second);
 	});
