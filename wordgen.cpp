@@ -6,13 +6,24 @@
 #include <set>
 #include <cstdio>
 #include <optional>
+#include <cuchar>
+#include <climits>
 
 using Letter = char32_t;
 
 namespace hoehrmann_utf8
 {
-	// Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
-	// See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
+	/* Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
+	See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
+
+	Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+	*/
 
 	enum class result:uint32_t{accept, reject};
 
@@ -110,6 +121,25 @@ std::optional<char32_t> read_codepoint(FILE* src)
 	}
 }
 
+std::string from_codepoints(std::basic_string_view<char32_t> str)
+{
+	std::array<char, MB_LEN_MAX> buffer{};
+	std::mbstate_t state{};
+	std::string ret;
+	auto ptr = std::begin(str);
+	while(ptr != std::end(str))
+	{
+		if(auto res = std::c32rtomb(std::data(buffer), *ptr, &state); res != static_cast<size_t>(-1))
+		{
+			auto copy_range = std::string_view{std::data(buffer), res};
+			std::copy(std::begin(copy_range), std::end(copy_range), std::back_inserter(ret));
+		}
+		++ptr;
+	}
+
+	return ret;
+}
+
 enum class letter_class:int{vowel, consonant, junk};
 
 auto classify(std::set<Letter> const& vowels, std::set<Letter> const& consonants, Letter letter)
@@ -155,7 +185,12 @@ auto collect_groups(std::set<Letter> const& vowels, std::set<Letter> const& cons
 							break;
 
 						case letter_class::junk:
-							break;
+						{
+							auto tmp = from_codepoints(current_group);
+							printf("%s\n", tmp.c_str());
+							current_group.clear();
+						}
+						break;
 					}
 					break;
 			}
@@ -169,6 +204,7 @@ auto collect_groups(std::set<Letter> const& vowels, std::set<Letter> const& cons
 
 int main()
 {
+	std::setlocale(LC_ALL, "en_US.utf8");
 	auto const vowels = single_vowels();
 	auto const consonants = single_consonants();
 
