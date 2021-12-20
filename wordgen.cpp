@@ -8,6 +8,7 @@
 #include <optional>
 #include <cuchar>
 #include <climits>
+#include <algorithm>
 
 using Letter = char32_t;
 
@@ -159,41 +160,42 @@ auto classify(std::set<Letter> const& vowels, std::set<Letter> const& consonants
 
 auto collect_groups(std::set<Letter> const& vowels, std::set<Letter> const& consonants, FILE* src = stdin)
 {
-	std::map<std::basic_string<Letter>, size_t> vowel_groups;
-	std::map<std::basic_string<Letter>, size_t> consonant_groups;
-
-	enum class state_value:int{init, vowel, consonant, junk};
-
-	auto current_state = state_value::init;
+	std::map<std::string, size_t> vowel_groups;
+	std::map<std::string, size_t> consonant_groups;
 
 	std::basic_string<Letter> current_group;
+
+	auto prev_class = letter_class::junk;
 
 	while(true)
 	{
 		if(auto cp = read_codepoint(src); cp.has_value())
 		{
-			switch(current_state)
-			{
-				case state_value::init:
-					switch(auto ch_class = classify(vowels, consonants, *cp); ch_class)
-					{
-						case letter_class::vowel:
-							current_group += *cp;
-							break;
-						case letter_class::consonant:
-							current_group += *cp;
-							break;
+			auto letter_class = classify(vowels, consonants, *cp);
 
-						case letter_class::junk:
-						{
-							auto tmp = from_codepoints(current_group);
-							printf("%s\n", tmp.c_str());
-							current_group.clear();
-						}
-						break;
-					}
-					break;
+			if(letter_class == prev_class)
+			{
+				current_group += *cp;
 			}
+			else
+			{
+				switch(prev_class)
+				{
+					case letter_class::vowel:
+						vowel_groups[from_codepoints(current_group)]++;
+						break;
+
+					case letter_class::consonant:
+						consonant_groups[from_codepoints(current_group)]++;
+						break;
+
+					case letter_class::junk:
+						break;
+				}
+				current_group.clear();
+			}
+
+			prev_class = letter_class;
 		}
 		else
 		{
@@ -208,5 +210,13 @@ int main()
 	auto const vowels = single_vowels();
 	auto const consonants = single_consonants();
 
-	collect_groups(vowels, consonants);
+	auto res = collect_groups(vowels, consonants);
+
+	std::for_each(std::begin(res.first), std::end(res.first), [](auto const& item) {
+		printf("%s: %zu\n", item.first.c_str(), item.second);
+	});
+
+	std::for_each(std::begin(res.second), std::end(res.second), [](auto const& item) {
+		printf("%s: %zu\n", item.first.c_str(), item.second);
+	});
 }
