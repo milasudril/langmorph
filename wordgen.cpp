@@ -294,7 +294,7 @@ int main()
 	auto const vowels = single_vowels();
 	auto const consonants = single_consonants();
 
-	auto res = load_words(vowels, consonants);
+	auto const res = load_words(vowels, consonants);
 
 	letter_group_table letter_groups;
 	letter_groups.insert("");
@@ -304,6 +304,16 @@ int main()
 			letter_groups.insert(item);
 		});
 	});
+
+	std::set<std::string> real_words;
+	std::ranges::for_each(res, [&real_words] (auto const& item) {
+		std::string word;
+		std::for_each(std::begin(item.letter_groups), std::end(item.letter_groups), [&word](auto const& item) {
+			word.append(item);
+		});
+		real_words.insert(word);
+	});
+
 
 	transition_matrix transition_rates{std::size(letter_groups)};
 
@@ -329,19 +339,21 @@ int main()
 	}
 
 	std::mt19937 rng;
-	for(size_t k = 0; k != 128; ++k)
+	for(size_t k = 0; k != 256; ++k)
 	{
 		size_t row = 0;
 		size_t n = 0;
+		std::string word;
 		do
 		{
 			row = distributions[row](rng);
 			auto const group = letter_groups.get(row);
-			[[maybe_unused ]] auto dummy = write(2, std::data(group), std::size(group));
+			word.append(letter_groups.get(row));
 			++n;
 		}
 		while(row != 0 && n != 4);
-		[[maybe_unused ]] auto dummy = write(2, "\n", 1);
+		if(!real_words.contains(word))
+		{ printf("%s\n", word.c_str()); }
 	}
 
 	return 0;
