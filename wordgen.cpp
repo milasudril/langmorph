@@ -158,14 +158,19 @@ auto classify(std::set<Letter> const& vowels, std::set<Letter> const& consonants
 	return letter_class::junk;
 }
 
-auto collect_groups(std::set<Letter> const& vowels, std::set<Letter> const& consonants, FILE* src = stdin)
+struct word
 {
-	std::map<std::string, size_t> vowel_groups;
-	std::map<std::string, size_t> consonant_groups;
+	std::vector<std::string> letter_groups;
+};
+
+auto load_words(std::set<Letter> const& vowels, std::set<Letter> const& consonants, FILE* src = stdin)
+{
+	std::vector<word> ret;
 
 	std::basic_string<Letter> current_group;
 
 	auto prev_class = letter_class::junk;
+	word current_word;
 
 	while(true)
 	{
@@ -182,14 +187,15 @@ auto collect_groups(std::set<Letter> const& vowels, std::set<Letter> const& cons
 				switch(prev_class)
 				{
 					case letter_class::vowel:
-						vowel_groups[from_codepoints(current_group)]++;
+						current_word.letter_groups.push_back(from_codepoints(current_group));
 						break;
 
 					case letter_class::consonant:
-						consonant_groups[from_codepoints(current_group)]++;
+						current_word.letter_groups.push_back(from_codepoints(current_group));
 						break;
 
 					case letter_class::junk:
+						ret.push_back(std::move(current_word));
 						break;
 				}
 				current_group = *cp;
@@ -199,7 +205,7 @@ auto collect_groups(std::set<Letter> const& vowels, std::set<Letter> const& cons
 		}
 		else
 		{
-			return std::pair{std::move(vowel_groups), std::move(consonant_groups)};
+			return ret;
 		}
 	}
 }
@@ -210,13 +216,14 @@ int main()
 	auto const vowels = single_vowels();
 	auto const consonants = single_consonants();
 
-	auto res = collect_groups(vowels, consonants);
+	auto res = load_words(vowels, consonants);
 
-	std::for_each(std::begin(res.first), std::end(res.first), [](auto const& item) {
-		printf("%s: %zu\n", item.first.c_str(), item.second);
+	std::for_each(std::begin(res), std::end(res), [](auto const& item) {
+		std::for_each(std::begin(item.letter_groups), std::end(item.letter_groups), [](auto const& item) {
+			printf("%s-",item.c_str());
+		});
+		printf("\n");
 	});
-	puts("=============================");
-	std::for_each(std::begin(res.second), std::end(res.second), [](auto const& item) {
-		printf("%s: %zu\n", item.first.c_str(), item.second);
-	});
+
+	return 0;
 }
