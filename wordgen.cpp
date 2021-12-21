@@ -9,6 +9,9 @@
 #include <cuchar>
 #include <climits>
 #include <algorithm>
+#include <memory>
+#include <span>
+#include <unistd.h>
 
 using Letter = char32_t;
 
@@ -231,15 +234,21 @@ public:
 		return ret;
 	}
 
-	auto const& id_to_group() const
+	auto get(std::string_view letter_group) const
 	{
-		return m_id_to_group;
+		auto i = m_group_to_id.find(letter_group);
+		if(i == std::end(m_group_to_id)) { return static_cast<letter_group_id>(0); }
+		return i->second;
 	}
 
-	auto const& group_to_id() const
+	auto get(letter_group_id id) const
 	{
-		return m_group_to_id;
+		auto i = m_id_to_group.find(id);
+		if(i == std::end(m_id_to_group)) { return std::string_view{""}; }
+		return std::string_view{i->second};
 	}
+
+	size_t size() const{ return std::size(m_id_to_group); }
 
 private:
 	std::map<letter_group_id, std::string> m_id_to_group;
@@ -247,6 +256,37 @@ private:
 	letter_group_id m_current_id;
 };
 
+class transition_matrix
+{
+public:
+	explicit transition_matrix(size_t n):m_rates{std::make_unique<double[]>(n*n)}, m_size{n}{}
+
+	std::span<double const> row(size_t n) const
+	{
+		return std::span{m_rates.get() + m_size*n, m_size};
+	}
+
+	std::span<double> row(size_t n)
+	{
+		return std::span{m_rates.get() + m_size*n, m_size};
+	}
+
+	double& operator()(size_t row, size_t col)
+	{
+		return *(m_rates.get() + m_size*row + col);
+	}
+
+	double operator()(size_t row, size_t col) const
+	{
+		return *(m_rates.get() + m_size*row + col);
+	}
+
+	size_t row_count() const { return m_size; }
+
+private:
+	std::unique_ptr<double[]> m_rates;
+	size_t m_size;
+};
 
 int main()
 {
@@ -257,12 +297,52 @@ int main()
 	auto res = load_words(vowels, consonants);
 
 	letter_group_table letter_groups;
+	letter_groups.insert("");
 
-	std::for_each(std::begin(res), std::end(res), [&letter_groups] (auto const& item) {
+	std::ranges::for_each(res, [&letter_groups] (auto const& item) {
 		std::for_each(std::begin(item.letter_groups), std::end(item.letter_groups), [&letter_groups](auto const& item) {
 			letter_groups.insert(item);
 		});
 	});
+
+	transition_matrix transition_rates{std::size(letter_groups)};
+
+	std::ranges::for_each(res, [&groups = std::as_const(letter_groups), &transition_rates] (auto const& item) {
+		std::string_view prev{""};
+		auto row = groups.get(prev);
+		auto i = std::begin(item.letter_groups);
+		while(i != std::end(item.letter_groups))
+		{
+			auto col = groups.get(*i);
+			++transition_rates(row, col);
+			row = col;
+			++i;
+		}
+	});
+
+	std::vector<std::discrete_distribution<size_t>> distributions;
+	distributions.reserve(transition_rates.row_count());
+	for(size_t k = 0; k != transition_rates.row_count(); ++k)
+	{
+		auto const row = transition_rates.row(k);
+		distributions.push_back(std::discrete_distribution<size_t>{std::begin(row), std::end(row)});
+	}
+
+	std::mt19937 rng;
+	for(size_t k = 0; k != 128; ++k)
+	{
+		size_t row = 0;
+		size_t n = 0;
+		do
+		{
+			row = distributions[row](rng);
+			auto const group = letter_groups.get(row);
+			[[maybe_unused ]] auto dummy = write(2, std::data(group), std::size(group));
+			++n;
+		}
+		while(row != 0 && n != 4);
+		[[maybe_unused ]] auto dummy = write(2, "\n", 1);
+	}
 
 	return 0;
 }

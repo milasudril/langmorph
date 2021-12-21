@@ -10,9 +10,11 @@
                 "compiler": {
                     "config": {
                         "cflags": [
-                            "-g",
-                            "-std=c++17"
-                        ]
+                            "-O2"
+                        ],
+                         "std_revision":{
+							"min":"c++20"
+                        }
                     },
                     "recipe": "cxx_linker.py",
                     "use_get_tags": 0
@@ -24,13 +26,15 @@
                 "compiler": {
                     "config": {
                         "cflags": [
-                            "-g",
-                            "-Wall",
-                            "-std=c++17"
+                            "-O2",
+                            "-Wall"
                         ],
                         "iquote": [
                             "."
-                        ]
+                        ],
+                        "std_revision":{
+							"min":"c++20"
+                        }
                     },
                     "recipe": "cxx_compiler.py",
                     "use_get_tags": 0
