@@ -210,6 +210,44 @@ auto load_words(std::set<Letter> const& vowels, std::set<Letter> const& consonan
 	}
 }
 
+class letter_group_table
+{
+public:
+	using letter_group_id = size_t;
+
+	letter_group_table():m_current_id{0}{}
+
+	letter_group_id insert(std::string_view letter_group)
+	{
+		auto const i = m_group_to_id.find(letter_group);
+		if(i != std::end(m_group_to_id))
+		{ return i->second; }
+
+		auto const ret = m_current_id;
+		m_group_to_id.insert(i, std::pair{letter_group, ret});
+		m_id_to_group.insert(std::pair{ret, letter_group});
+
+		++m_current_id;
+		return ret;
+	}
+
+	auto const& id_to_group() const
+	{
+		return m_id_to_group;
+	}
+
+	auto const& group_to_id() const
+	{
+		return m_group_to_id;
+	}
+
+private:
+	std::map<letter_group_id, std::string> m_id_to_group;
+	std::map<std::string, letter_group_id, std::less<>> m_group_to_id;
+	letter_group_id m_current_id;
+};
+
+
 int main()
 {
 	std::setlocale(LC_ALL, "en_US.utf8");
@@ -218,11 +256,12 @@ int main()
 
 	auto res = load_words(vowels, consonants);
 
-	std::for_each(std::begin(res), std::end(res), [](auto const& item) {
-		std::for_each(std::begin(item.letter_groups), std::end(item.letter_groups), [](auto const& item) {
-			printf("%s-",item.c_str());
+	letter_group_table letter_groups;
+
+	std::for_each(std::begin(res), std::end(res), [&letter_groups] (auto const& item) {
+		std::for_each(std::begin(item.letter_groups), std::end(item.letter_groups), [&letter_groups](auto const& item) {
+			letter_groups.insert(item);
 		});
-		printf("\n");
 	});
 
 	return 0;
