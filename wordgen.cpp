@@ -66,44 +66,46 @@ namespace hoehrmann_utf8
 auto single_vowels()
 {
 	return std::set<Letter>{
-		U'a',
-		U'e',
-		U'i',
-		U'o',
-		U'u',
-		U'y',
-		U'ä',
-		U'å',
-		U'é',
-		U'ö',
-		U'ü'};
+		U'a',U'A',
+		U'e',U'E',
+		U'i',U'I',
+		U'o',U'O',
+		U'u',U'U',
+		U'y',U'Y',
+		U'ä',U'Ä',
+		U'å',U'Å',
+		U'é',U'É',
+		U'ö',U'Ö',
+		U'ü',U'Ü'
+	};
 }
 
 auto single_consonants()
 {
 	return std::set<Letter>{
-		U'b',
-		U'c',
-		U'd',
-		U'f',
-		U'g',
-		U'h',
-		U'j',
-		U'k',
-		U'l',
-		U'm',
-		U'n',
-		U'p',
-		U'q',
-		U'r',
-		U's',
-		U't',
-		U'v',
-		U'w',
-		U'x',
-		U'z',
-		U'þ',
-		U'ð'};
+		U'b',U'B',
+		U'c',U'C',
+		U'd',U'D',
+		U'f',U'F',
+		U'g',U'G',
+		U'h',U'H',
+		U'j',U'J',
+		U'k',U'K',
+		U'l',U'L',
+		U'm',U'M',
+		U'n',U'N',
+		U'p',U'P',
+		U'q',U'Q',
+		U'r',U'R',
+		U's',U'S',
+		U't',U'T',
+		U'v',U'V',
+		U'w',U'W',
+		U'x',U'X',
+		U'z',U'Z',
+		U'þ',U'Þ',
+		U'ð',U'Ð'
+	};
 }
 
 std::optional<char32_t> read_codepoint(FILE* src)
@@ -347,7 +349,6 @@ int main()
 		do
 		{
 			row = distributions[row](rng);
-			auto const group = letter_groups.get(row);
 			word.append(letter_groups.get(row));
 			++n;
 		}
