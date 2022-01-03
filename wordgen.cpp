@@ -200,6 +200,7 @@ auto load_words(std::set<Letter> const& vowels, std::set<Letter> const& consonan
 						break;
 
 					case letter_class::junk:
+						current_word.letter_groups.push_back("");
 						ret.push_back(std::move(current_word));
 						break;
 				}
@@ -261,7 +262,10 @@ private:
 class transition_matrix
 {
 public:
-	explicit transition_matrix(size_t n):m_rates{std::make_unique<double[]>(n*n)}, m_size{n}{}
+	explicit transition_matrix(size_t n):m_rates{std::make_unique<double[]>(n*n)}, m_size{n}
+	{
+		std::fill_n(m_rates.get(), n*n, 0.0);
+	}
 
 	std::span<double const> row(size_t n) const
 	{
@@ -352,7 +356,7 @@ int main()
 			word.append(letter_groups.get(row));
 			++n;
 		}
-		while(row != 0 && n != 4);
+		while(row != 0);
 		if(!real_words.contains(word))
 		{ printf("%s\n", word.c_str()); }
 	}
