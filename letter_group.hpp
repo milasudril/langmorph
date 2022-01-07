@@ -27,19 +27,21 @@ namespace wordgen
 	}
 
 	template<class LetterGroupSet>
-	std::pair<std::string_view, letter_group const*>
+	std::pair<std::string_view, std::string_view>
 	next_group(std::string_view word, LetterGroupSet const& letter_groups)
 	{
 		auto ptr = std::begin(word);
 		while(ptr != std::end(word))
 		{
-			if(auto i = letter_groups.find(std::string_view{ptr, std::end(word)}); i != std::end(letter_groups))
+			++ptr;
+			auto const slice = std::string_view{std::begin(word), ptr};
+			if(auto i = letter_groups.find(slice); i != std::end(letter_groups))
 			{
-				return std::pair{std::string_view{std::begin(word), ptr + 1}, i};
+				return std::pair{slice, std::string_view{ptr, std::end(word)}};
 			}
 		}
 
-		return std::pair{std::string_view{}, nullptr};
+		return std::pair{std::string_view{}, std::string_view{}};
 	}
 }
 
