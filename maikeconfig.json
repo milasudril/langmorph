@@ -53,6 +53,9 @@
                             "-g",
                             "-Wall"
                         ],
+                        "std_revision":{
+							"min":"c++20"
+                        },
                         "iquote": [
                             "."
                         ]
@@ -120,7 +123,7 @@
                 "^\\.",
                 "^__"
             ],
-            "recursive": 0
+            "recursive": 1
         }
     }
 }
