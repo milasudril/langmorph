@@ -4,6 +4,7 @@
 #include "./letter_group.hpp"
 #include "./stream_tokenizer.hpp"
 #include "./letter_group_index.hpp"
+#include "./stat_counters.hpp"
 
 int main(int argc, char** argv)
 {
@@ -15,6 +16,20 @@ int main(int argc, char** argv)
 
 	auto letter_groups = wordgen::load(argv[1], [](auto file) {
 		return load(std::type_identity<wordgen::letter_group_index>{}, wordgen::stream_tokenizer{file});
+	});
+
+
+
+	wordgen::load(argv[2], [&letter_groups](auto file) {
+		wordgen::transition_rate_table transition_rates{std::size(letter_groups)};
+		wordgen::stream_tokenizer tok{file};
+		while(!tok.empty())
+		{
+			auto word = std::move(tok.front());
+			tok.pop();
+		}
+
+		return transition_rates;
 	});
 
 	return 0;
