@@ -22,12 +22,14 @@ int main(int argc, char** argv)
 
 	wordgen::load(argv[2], [&letter_groups](auto file) {
 		wordgen::transition_rate_table transition_rates{std::size(letter_groups)};
+		wordgen::histogram length_hist;
 		wordgen::stream_tokenizer tok{file};
 		while(!tok.empty())
 		{
 			auto word = std::move(tok.front());
 			tok.pop();
 			auto word_split = split_longest(word, letter_groups);
+			++length_hist(wordgen::histogram_index{std::size(word_split)});
 			std::ranges::for_each(word_split, [from = letter_groups.get(" "), &letter_groups, &transition_rates](auto letter_group) mutable {
 				auto to = letter_groups.get(letter_group);
 				++transition_rates(wordgen::from_id{from.value()}, wordgen::to_id{to.value()});

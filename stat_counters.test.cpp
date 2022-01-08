@@ -50,7 +50,7 @@ TESTCASE(wordgen_statcounters_transition_rate_table)
 
 TESTCASE(wordgen_statcounters_histogram)
 {
-	wordgen::histogram hist{4};
+	wordgen::histogram hist;
 	for(size_t k = 0; k != 4; ++k)
 	{
 		hist(wordgen::histogram_index{k}) = k;

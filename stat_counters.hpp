@@ -71,7 +71,7 @@ namespace wordgen
 	class histogram
 	{
 	public:
-		explicit histogram(size_t size): m_size{0}
+		histogram(): m_size{0}
 		{}
 
 		size_t operator()(histogram_index index) const
