@@ -65,6 +65,16 @@ namespace wordgen
 			return m_id_to_group.find(id)->second;
 		}
 
+		bool contains(letter_group const& group) const
+		{
+			return m_group_to_id.contains(group.value());
+		}
+
+		bool contains(letter_group_id id) const
+		{
+			return m_id_to_group.contains(id);
+		}
+
 	private:
 		std::map<letter_group_id, letter_group> m_id_to_group;
 		std::map<std::string_view, letter_group_id> m_group_to_id;
