@@ -71,10 +71,8 @@ namespace wordgen
 	class histogram
 	{
 	public:
-		explicit histogram(size_t size):m_counts{std::make_unique<size_t[]>(size)}, m_size{size}
-		{
-			std::fill(m_counts.get(), m_counts.get() + size, 0);
-		}
+		explicit histogram(size_t size): m_size{0}
+		{}
 
 		size_t operator()(histogram_index index) const
 		{
@@ -83,7 +81,16 @@ namespace wordgen
 
 		size_t& operator()(histogram_index index)
 		{
-			return m_counts[index.value()];
+			auto const i_val = index.value();
+			if(i_val >= m_size)
+			{
+				auto counts = std::make_unique<size_t[]>(i_val + 1);
+				std::ranges::copy((*this)(), counts.get());
+				counts[i_val] = 0;
+				m_counts = std::move(counts);
+				m_size = i_val + 1;
+			}
+			return m_counts[i_val];
 		}
 
 		std::span<size_t const> operator()() const

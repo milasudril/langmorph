@@ -1,4 +1,4 @@
-//@{"target":{"name":"stat_counters.test.cpp", "actions":["run"]}}
+//@{"target":{"name":"stat_counters.test", "actions":["run"]}}
 
 #include "./stat_counters.hpp"
 
