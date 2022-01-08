@@ -50,13 +50,13 @@ TESTCASE(wordgen_letter_group_split_word)
 		wordgen::letter_group{"e"}
 	};
 
-	auto token = next_group(std::string_view{"kalle"}, letter_groups);
+	auto token = next_group_longest(std::string_view{"kalle"}, letter_groups);
 	EXPECT_EQ(token.first, "k");
-	token = next_group(token.second, letter_groups);
+	token = next_group_longest(token.second, letter_groups);
 	EXPECT_EQ(token.first, "a");
-	token = next_group(token.second, letter_groups);
+	token = next_group_longest(token.second, letter_groups);
 	EXPECT_EQ(token.first, "ll");
-	token = next_group(token.second, letter_groups);
+	token = next_group_longest(token.second, letter_groups);
 	EXPECT_EQ(token.first, "e");
 	EXPECT_EQ(std::size(token.second), 0);
 }
@@ -70,7 +70,7 @@ TESTCASE(wordgen_letter_group_split_word_unknown_letters)
 		wordgen::letter_group{"e"}
 	};
 
-	auto token = next_group(std::string_view{"bad"}, letter_groups);
+	auto token = next_group_longest(std::string_view{"bad"}, letter_groups);
 	EXPECT_EQ(std::size(token.first), 0);
 	EXPECT_EQ(std::size(token.second), 0);
 }
@@ -84,8 +84,8 @@ TESTCASE(wordgen_letter_group_split_word_unknown_letters_not_begin)
 		wordgen::letter_group{"e"}
 	};
 
-	auto token = next_group(std::string_view{"kolla"}, letter_groups);
-	token = next_group(token.second, letter_groups);
+	auto token = next_group_longest(std::string_view{"kolla"}, letter_groups);
+	token = next_group_longest(token.second, letter_groups);
 	EXPECT_EQ(std::size(token.first), 0);
 	EXPECT_EQ(std::size(token.second), 0);
 }
@@ -105,16 +105,16 @@ TESTCASE(wordgen_letter_group_split_word_match_longest)
 		wordgen::letter_group{"r"},
 	};
 
-	auto token = next_group(std::string_view{"schlager"}, letter_groups);
+	auto token = next_group_longest(std::string_view{"schlager"}, letter_groups);
 	EXPECT_EQ(token.first, "sch");
-	token = next_group(token.second, letter_groups);
+	token = next_group_longest(token.second, letter_groups);
 	EXPECT_EQ(token.first, "l");
-	token = next_group(token.second, letter_groups);
+	token = next_group_longest(token.second, letter_groups);
 	EXPECT_EQ(token.first, "a");
-	token = next_group(token.second, letter_groups);
+	token = next_group_longest(token.second, letter_groups);
 	EXPECT_EQ(token.first, "g");
-	token = next_group(token.second, letter_groups);
+	token = next_group_longest(token.second, letter_groups);
 	EXPECT_EQ(token.first, "e");
-	token = next_group(token.second, letter_groups);
+	token = next_group_longest(token.second, letter_groups);
 	EXPECT_EQ(token.first, "r");
 }
