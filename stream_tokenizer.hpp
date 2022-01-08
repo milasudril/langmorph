@@ -16,8 +16,12 @@ namespace wordgen
 
 		decltype(auto) top() &
 		{
-			if(std::size(m_buffer) == 0){ pop(); }
 			return std::move(m_buffer);
+		}
+
+		std::string_view top() const&
+		{
+			return m_buffer;
 		}
 
 		void pop();

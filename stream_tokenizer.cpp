@@ -36,6 +36,7 @@ void wordgen::stream_tokenizer::pop()
 {
 	if(m_src == nullptr)
 	{ return; }
+
 	m_buffer.clear();
 	auto ch_in = eat_whitespace(m_src);
 
@@ -54,6 +55,13 @@ void wordgen::stream_tokenizer::pop()
 		{
 			if(last_delim != std::string::npos)
 			{ m_buffer.resize(last_delim); }
+
+			if(std::size(m_buffer) == 0)
+			{
+				ch_in = getc(m_src);
+				continue;
+			}
+
 			return;
 		}
 
