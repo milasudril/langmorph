@@ -59,6 +59,13 @@ namespace wordgen
 			return m_group_to_id.find(group.value())->second;
 		}
 
+		letter_group_id get(std::string_view group) const
+		{
+			assert(m_group_to_id.contains(group));
+			return m_group_to_id.find(group)->second;
+		}
+
+
 		letter_group const& get(letter_group_id id) const
 		{
 			assert(m_id_to_group.contains(id));

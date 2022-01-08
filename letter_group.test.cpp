@@ -127,7 +127,13 @@ TESTCASE(wordgen_letter_group_split_word_match_longest)
 	EXPECT_EQ(std::end(token.second), std::end(sv));
 
 	auto groups = split_longest(sv, letter_groups);
-	EXPECT_EQ(std::size(groups), 6);
+	REQUIRE_EQ(std::size(groups), 6);
+	EXPECT_EQ(groups[0], "sch");
+	EXPECT_EQ(groups[1], "l");
+	EXPECT_EQ(groups[2], "a");
+	EXPECT_EQ(groups[3], "g");
+	EXPECT_EQ(groups[4], "e");
+	EXPECT_EQ(groups[5], "r");
 }
 
 TESTCASE(wordgen_letter_group_split_word_match_shortest)
