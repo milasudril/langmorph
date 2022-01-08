@@ -22,6 +22,14 @@ namespace wordgen
 	{
 		return file_handle{fopen(std::forward<Args>(args)...)};
 	}
+
+	template<class T, class ... Args>
+	auto load(char const* filename, T&& loader, Args... args)
+	{
+		auto input_file = wordgen::create_file(filename, "rb");
+		return loader(input_file.get(), std::forward<Args>(args)...);
+	}
+
 }
 
 #endif
