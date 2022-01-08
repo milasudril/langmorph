@@ -48,24 +48,18 @@ namespace wordgen
 	std::pair<std::string_view, std::string_view>
 	next_group_longest(std::string_view word, LetterGroupSet const& letter_groups)
 	{
-		auto shortest = next_group_shortest(word, letter_groups);
-		if(std::size(shortest.first) == 0)
-		{ return shortest; }
-
-		auto ptr = std::end(shortest.first);
-		auto slice = shortest.first;
-		while(ptr != std::end(word))
+		auto ptr = std::end(word);
+		while(ptr != std::begin(word))
 		{
-			++ptr;
-			auto const slice_next = std::string_view{std::begin(shortest.first), ptr};
-			if(auto i = letter_groups.find(slice_next); i == std::end(letter_groups))
+			auto const slice = std::string_view{std::begin(word), ptr};
+			if(auto i = letter_groups.find(slice); i != std::end(letter_groups))
 			{
 				return std::pair{slice, std::string_view{std::end(slice), std::end(word)}};
 			}
-			slice = slice_next;
+			--ptr;
 		}
 
-		return shortest;
+		return std::pair{std::string_view{}, std::string_view{}};
 	}
 }
 
