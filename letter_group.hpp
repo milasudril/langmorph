@@ -36,7 +36,7 @@ namespace wordgen
 		{
 			++ptr;
 			auto const slice = std::string_view{std::begin(word), ptr};
-			if(auto i = letter_groups.find(slice); i != std::end(letter_groups))
+			if(letter_groups.contains(slice))
 			{
 				return std::pair{slice, std::string_view{ptr, std::end(word)}};
 			}
@@ -53,7 +53,7 @@ namespace wordgen
 		while(ptr != std::begin(word))
 		{
 			auto const slice = std::string_view{std::begin(word), ptr};
-			if(auto i = letter_groups.find(slice); i != std::end(letter_groups))
+			if(letter_groups.contains(slice))
 			{
 				return std::pair{slice, std::string_view{std::end(slice), std::end(word)}};
 			}

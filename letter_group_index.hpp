@@ -70,6 +70,12 @@ namespace wordgen
 			return m_group_to_id.contains(group.value());
 		}
 
+		bool contains(std::string_view group) const
+		{
+			return m_group_to_id.contains(group);
+		}
+
+
 		bool contains(letter_group_id id) const
 		{
 			return m_id_to_group.contains(id);
