@@ -14,12 +14,12 @@ namespace wordgen
 		explicit stream_tokenizer(FILE* src): m_src{src}
 		{ pop(); }
 
-		decltype(auto) top() &
+		decltype(auto) front() &
 		{
 			return std::move(m_buffer);
 		}
 
-		std::string_view top() const&
+		std::string_view front() const&
 		{
 			return m_buffer;
 		}

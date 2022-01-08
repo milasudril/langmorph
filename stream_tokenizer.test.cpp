@@ -14,7 +14,7 @@ TESTCASE(wordgen_stream_tokenizer_read_data)
 	std::vector<std::string> output;
 	while(!tok.empty())
 	{
-		output.push_back(tok.top());
+		output.push_back(tok.front());
 		tok.pop();
 	}
 

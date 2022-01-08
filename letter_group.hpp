@@ -64,12 +64,12 @@ namespace wordgen
 	}
 
 	template<class LetterGroupSet, class TokenStream>
-	LetterGroupSet load(std::type_identity<LetterGroupSet>, TokenStream& tokens)
+	LetterGroupSet load(std::type_identity<LetterGroupSet>, TokenStream&& tokens)
 	{
 		LetterGroupSet ret;
 		while(!tokens.empty())
 		{
-			ret.insert(std::move(tokens.front()));
+			ret.insert(letter_group{std::move(tokens.front())});
 			tokens.pop();
 		}
 		return ret;
