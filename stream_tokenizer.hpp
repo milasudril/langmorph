@@ -25,7 +25,7 @@ namespace wordgen
 		void pop();
 
 		bool empty() const
-		{ return m_src == nullptr; }
+		{ return m_src == nullptr && std::size(m_buffer) == 0; }
 
 	private:
 		FILE* m_src;
