@@ -74,3 +74,47 @@ TESTCASE(wordgen_letter_group_split_word_unknown_letters)
 	EXPECT_EQ(std::size(token.first), 0);
 	EXPECT_EQ(std::size(token.second), 0);
 }
+
+TESTCASE(wordgen_letter_group_split_word_unknown_letters_not_begin)
+{
+	std::set<wordgen::letter_group, letter_group_cmp> letter_groups{
+		wordgen::letter_group{"k"},
+		wordgen::letter_group{"a"},
+		wordgen::letter_group{"ll"},
+		wordgen::letter_group{"e"}
+	};
+
+	auto token = next_group(std::string_view{"kolla"}, letter_groups);
+	token = next_group(token.second, letter_groups);
+	EXPECT_EQ(std::size(token.first), 0);
+	EXPECT_EQ(std::size(token.second), 0);
+}
+
+TESTCASE(wordgen_letter_group_split_word_match_longest)
+{
+	std::set<wordgen::letter_group, letter_group_cmp> letter_groups{
+		wordgen::letter_group{"sch"},
+		wordgen::letter_group{"s"},
+		wordgen::letter_group{"c"},
+		wordgen::letter_group{"h"},
+		wordgen::letter_group{"e"},
+		wordgen::letter_group{"j"},
+		wordgen::letter_group{"l"},
+		wordgen::letter_group{"a"},
+		wordgen::letter_group{"g"},
+		wordgen::letter_group{"r"},
+	};
+
+	auto token = next_group(std::string_view{"schlager"}, letter_groups);
+	EXPECT_EQ(token.first, "sch");
+	token = next_group(token.second, letter_groups);
+	EXPECT_EQ(token.first, "l");
+	token = next_group(token.second, letter_groups);
+	EXPECT_EQ(token.first, "a");
+	token = next_group(token.second, letter_groups);
+	EXPECT_EQ(token.first, "g");
+	token = next_group(token.second, letter_groups);
+	EXPECT_EQ(token.first, "e");
+	token = next_group(token.second, letter_groups);
+	EXPECT_EQ(token.first, "r");
+}

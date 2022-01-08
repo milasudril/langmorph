@@ -45,5 +45,4 @@ namespace wordgen
 	}
 }
 
-
 #endif
