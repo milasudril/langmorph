@@ -27,6 +27,11 @@ int main(int argc, char** argv)
 		{
 			auto word = std::move(tok.front());
 			tok.pop();
+			auto letter_group = next_group_longest(word, letter_groups);
+			while(std::size(letter_group.second) != 0)
+			{
+				letter_group = next_group_longest(letter_group.second, letter_groups);
+			}
 		}
 
 		return transition_rates;

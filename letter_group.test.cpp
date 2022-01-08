@@ -85,10 +85,12 @@ TESTCASE(wordgen_letter_group_split_word_unknown_letters_not_begin)
 		wordgen::letter_group{"e"}
 	};
 
-	auto token = next_group_longest(std::string_view{"kolla"}, letter_groups);
+	auto const sv = std::string_view{"kolla"};
+	auto token = next_group_longest(sv, letter_groups);
 	token = next_group_longest(token.second, letter_groups);
 	EXPECT_EQ(std::size(token.first), 0);
 	EXPECT_EQ(std::size(token.second), 0);
+	EXPECT_NE(std::end(token.second), std::end(sv));
 }
 
 TESTCASE(wordgen_letter_group_split_word_match_longest)
@@ -106,7 +108,8 @@ TESTCASE(wordgen_letter_group_split_word_match_longest)
 		wordgen::letter_group{"r"},
 	};
 
-	auto token = next_group_longest(std::string_view{"schlager"}, letter_groups);
+	auto const sv = std::string_view{"schlager"};
+	auto token = next_group_longest(sv, letter_groups);
 	EXPECT_EQ(token.first, "sch");
 	token = next_group_longest(token.second, letter_groups);
 	EXPECT_EQ(token.first, "l");
@@ -118,6 +121,7 @@ TESTCASE(wordgen_letter_group_split_word_match_longest)
 	EXPECT_EQ(token.first, "e");
 	token = next_group_longest(token.second, letter_groups);
 	EXPECT_EQ(token.first, "r");
+	EXPECT_EQ(std::end(token.second), std::end(sv));
 }
 
 TESTCASE(wordgen_letter_group_split_word_match_shortest)
