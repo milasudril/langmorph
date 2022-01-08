@@ -2,6 +2,7 @@
 #define WORDGEN_LETTERGROUP_HPP
 
 #include <string>
+#include <type_traits>
 
 namespace wordgen
 {
@@ -60,6 +61,18 @@ namespace wordgen
 		}
 
 		return std::pair{std::string_view{}, std::string_view{}};
+	}
+
+	template<class LetterGroupSet, class TokenStream>
+	LetterGroupSet load(std::type_identity<LetterGroupSet>, TokenStream& tokens)
+	{
+		LetterGroupSet ret;
+		while(!tokens.empty())
+		{
+			ret.insert(std::move(tokens.front()));
+			tokens.pop();
+		}
+		return ret;
 	}
 }
 
