@@ -3,6 +3,7 @@
 
 #include <string>
 #include <type_traits>
+#include <vector>
 
 namespace wordgen
 {
@@ -61,6 +62,29 @@ namespace wordgen
 		}
 
 		return std::pair{std::string_view{}, std::string_view{}};
+	}
+
+	template<class LetterGroupSet>
+	std::vector<std::string_view> split_longest(std::string_view word, LetterGroupSet const& letter_groups)
+	{
+		std::vector<std::string_view> ret;
+		auto token = next_group_longest(word, letter_groups);
+		while(std::size(token.second) != 0)
+		{
+			ret.push_back(token.first);
+			token = next_group_longest(token.second, letter_groups);
+		}
+
+		if(std::end(token.second) == std::end(word))
+		{
+			ret.push_back(token.first);
+		}
+		else
+		{
+			ret.clear();
+		}
+
+		return ret;
 	}
 
 	template<class LetterGroupSet, class TokenStream>

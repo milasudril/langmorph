@@ -91,6 +91,9 @@ TESTCASE(wordgen_letter_group_split_word_unknown_letters_not_begin)
 	EXPECT_EQ(std::size(token.first), 0);
 	EXPECT_EQ(std::size(token.second), 0);
 	EXPECT_NE(std::end(token.second), std::end(sv));
+
+	auto groups = split_longest(sv, letter_groups);
+	EXPECT_EQ(std::size(groups), 0);
 }
 
 TESTCASE(wordgen_letter_group_split_word_match_longest)
@@ -122,6 +125,9 @@ TESTCASE(wordgen_letter_group_split_word_match_longest)
 	token = next_group_longest(token.second, letter_groups);
 	EXPECT_EQ(token.first, "r");
 	EXPECT_EQ(std::end(token.second), std::end(sv));
+
+	auto groups = split_longest(sv, letter_groups);
+	EXPECT_EQ(std::size(groups), 6);
 }
 
 TESTCASE(wordgen_letter_group_split_word_match_shortest)
