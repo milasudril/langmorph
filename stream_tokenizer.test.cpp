@@ -5,7 +5,7 @@
 
 #include "testfwk/testfwk.hpp"
 
-TESTCASE(stream_tokenizer_read_data)
+TESTCASE(wordgen_stream_tokenizer_read_data)
 {
 	auto handle = wordgen::create_file("testdata/input_file.txt", "rb");
 

@@ -3,7 +3,8 @@
 
 #include "./letter_group.hpp"
 
-#include <assert>
+#include <cassert>
+#include <map>
 
 namespace wordgen
 {
@@ -27,8 +28,15 @@ namespace wordgen
 
 		auto operator<=>(letter_group_id const&) const = default;
 
+		auto value() const { return m_value; }
+
 	private:
 		size_t m_value;
+	};
+
+	inline auto to_string(letter_group_id id)
+	{
+		return std::to_string(id.value());
 	}
 
 	class letter_group_index
@@ -53,13 +61,13 @@ namespace wordgen
 
 		letter_group const& get(letter_group_id id) const
 		{
-			assert(m_id_to_group.contains(id))
+			assert(m_id_to_group.contains(id));
 			return m_id_to_group.find(id)->second;
 		}
 
 	private:
 		std::map<letter_group_id, letter_group> m_id_to_group;
-		std::map<std::sting_view<letter_group>, letter_group_id> m_group_to_id;
+		std::map<std::string_view, letter_group_id> m_group_to_id;
 		letter_group_id m_last_id;
 	};
 }
