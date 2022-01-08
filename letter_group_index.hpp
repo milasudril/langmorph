@@ -75,6 +75,11 @@ namespace wordgen
 			return m_id_to_group.contains(id);
 		}
 
+		size_t size() const
+		{
+			return std::size(m_id_to_group);
+		}
+
 	private:
 		std::map<letter_group_id, letter_group> m_id_to_group;
 		std::map<std::string_view, letter_group_id> m_group_to_id;

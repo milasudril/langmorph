@@ -70,6 +70,8 @@ TESTCASE(wordgen_letter_group_index_insert_and_get)
 	auto letter_groups_out = load(std::type_identity<storage>{}, letter_groups_in);
 	static_assert(std::is_same_v<decltype(letter_groups_out), storage>);
 
+	EXPECT_EQ(std::size(letter_groups_out), std::size(letter_groups) - 1);
+
 	std::ranges::for_each(std::begin(letter_groups), std::end(letter_groups), [current_id = wordgen::letter_group_id{},
 		&letter_groups_out,
 		prev = std::string_view{},
