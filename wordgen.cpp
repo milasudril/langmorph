@@ -11,7 +11,7 @@
 
 int main(int argc, char** argv)
 {
-	if(argc < 2)
+	if(argc < 3)
 	{
 		puts("Too few arguments");
 		return -1;
@@ -27,6 +27,14 @@ int main(int argc, char** argv)
 
 	auto word_length = wordgen::gen_pmf(word_stats.length_histogram()());
 	wordgen::bivar_discrete_distribution letter_group_probs{word_stats.transition_rates()};
+
+	std::mt19937 rng;
+
+	for(size_t k = 0; k != 128; ++k)
+	{
+		auto length = word_length(rng);
+		printf("%zu\n", length);
+	}
 
 	return 0;
 }
