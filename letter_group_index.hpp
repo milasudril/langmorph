@@ -11,6 +11,8 @@ namespace wordgen
 	class letter_group_id
 	{
 	public:
+		explicit letter_group_id(size_t value):m_value{value}{}
+
 		letter_group_id():m_value{0}{}
 
 		letter_group_id& operator++()
@@ -42,6 +44,11 @@ namespace wordgen
 	class letter_group_index
 	{
 	public:
+		letter_group_index()
+		{
+			insert(letter_group{" "});
+		}
+
 		void insert(letter_group&& group)
 		{
 			if(m_group_to_id.contains(group.value()))
