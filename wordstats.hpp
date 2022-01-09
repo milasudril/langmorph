@@ -36,7 +36,7 @@ namespace wordgen
 		auto const& length_histogram() const
 		{ return m_length_hist; }
 
-		auto const& transtion_rates() const
+		auto const& transition_rates() const
 		{ return m_transition_rates; }
 
 	private:

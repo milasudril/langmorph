@@ -50,6 +50,11 @@ namespace wordgen
 			return std::span{m_counts.get() + m_size*from.value(), m_size};
 		}
 
+		size_t node_count() const
+		{
+			return m_size;
+		}
+
 	private:
 		std::unique_ptr<size_t[]> m_counts;
 		size_t m_size;
