@@ -5,6 +5,9 @@
 #include "./stream_tokenizer.hpp"
 #include "./letter_group_index.hpp"
 #include "./word_stats.hpp"
+#include "./prob_distributions.hpp"
+
+#include <random>
 
 int main(int argc, char** argv)
 {
@@ -21,6 +24,9 @@ int main(int argc, char** argv)
 	auto word_stats = wordgen::load(argv[2], [&letter_groups](auto file) {
 		return wordgen::word_stats{wordgen::stream_tokenizer{file}, letter_groups};
 	});
+
+	auto word_length = wordgen::gen_pmf(word_stats.length_histogram()());
+	wordgen::bivar_discrete_distribution letter_group_probs{word_stats.transition_rates()};
 
 	return 0;
 }

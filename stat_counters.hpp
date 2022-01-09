@@ -32,6 +32,8 @@ namespace wordgen
 	class transition_rate_table
 	{
 	public:
+		using row_index_type = from_id;
+
 		explicit transition_rate_table(size_t size):m_counts{std::make_unique<size_t[]>(size*size)}, m_size{size}
 		{}
 
@@ -51,6 +53,16 @@ namespace wordgen
 		}
 
 		size_t node_count() const
+		{
+			return m_size;
+		}
+
+		size_t row_count() const
+		{
+			return m_size;
+		}
+
+		size_t col_count() const
 		{
 			return m_size;
 		}
