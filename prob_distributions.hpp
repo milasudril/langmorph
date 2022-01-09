@@ -4,6 +4,8 @@
 #include <random>
 #include <algorithm>
 #include <span>
+#include <memory>
+#include <cassert>
 
 namespace wordgen
 {
@@ -44,7 +46,7 @@ namespace wordgen
 		decltype(auto) probabilities(size_t row) const
 		{
 			assert(row < m_size);
-			return m_distributions[row];
+			return m_distributions[row].probabilities();
 		}
 
 		size_t row_count() const
