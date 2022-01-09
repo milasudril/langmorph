@@ -48,7 +48,7 @@ TESTCASE(wordgen_statcounters_transition_rate_table)
 	}
 }
 
-TESTCASE(wordgen_statcounters_histogram)
+TESTCASE(wordgen_statcounters_histogram_insert_values)
 {
 	wordgen::histogram hist;
 	for(size_t k = 0; k != 4; ++k)
@@ -67,4 +67,14 @@ TESTCASE(wordgen_statcounters_histogram)
 	{
 		EXPECT_EQ(values[l], l);
 	}
+}
+
+TESTCASE(wordgen_statcounters_histogram_insert_values_sparse)
+{
+	wordgen::histogram hist;
+
+	++hist(wordgen::histogram_index{453784});
+	auto const vals = hist();
+	EXPECT_EQ(std::all_of(std::begin(vals), std::end(vals) - 2, [](auto val){return val == 0;}), true);
+	EXPECT_EQ(*(std::end(vals) - 1), 1);
 }

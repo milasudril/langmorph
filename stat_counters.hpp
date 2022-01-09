@@ -33,18 +33,16 @@ namespace wordgen
 	{
 	public:
 		explicit transition_rate_table(size_t size):m_counts{std::make_unique<size_t[]>(size*size)}, m_size{size}
-		{
-			std::fill(m_counts.get(), m_counts.get() + size*size, 0);
-		}
+		{}
 
 		size_t operator()(from_id from, to_id to) const
 		{
-			return m_counts[m_size*from.value()+ to.value()];
+			return m_counts[m_size*from.value() + to.value()];
 		}
 
 		size_t& operator()(from_id from, to_id to)
 		{
-			return m_counts[m_size*from.value()+ to.value()];
+			return m_counts[m_size*from.value() + to.value()];
 		}
 
 		std::span<size_t const> operator()(from_id from) const
@@ -86,7 +84,6 @@ namespace wordgen
 			{
 				auto counts = std::make_unique<size_t[]>(i_val + 1);
 				std::ranges::copy((*this)(), counts.get());
-				counts[i_val] = 0;
 				m_counts = std::move(counts);
 				m_size = i_val + 1;
 			}
