@@ -62,9 +62,14 @@ namespace wordgen
 
 		auto value() const { return m_value; }
 
+		auto operator<=>(histogram_index const&) const = default;
+
 	private:
 		size_t m_value;
 	};
+
+	inline std::string to_string(histogram_index i)
+	{ return std::to_string(i.value()); }
 
 	class histogram
 	{
@@ -93,6 +98,11 @@ namespace wordgen
 		std::span<size_t const> operator()() const
 		{
 			return std::span{m_counts.get(), m_size};
+		}
+
+		auto largest_index() const
+		{
+			return histogram_index{m_size - 1};
 		}
 
 	private:

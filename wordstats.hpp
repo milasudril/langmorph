@@ -18,6 +18,9 @@ namespace wordgen
 				auto word = std::move(words.front());
 				words.pop();
 				auto word_split = split_longest(word, letter_groups);
+				if(std::size(word_split) == 0)
+				{ continue; }
+
 				++m_length_hist(wordgen::histogram_index{std::size(word_split)});
 				std::ranges::for_each(word_split,
 					                  [from = letter_groups.get(" "),
@@ -30,7 +33,7 @@ namespace wordgen
 			}
 		}
 
-		auto const& length_hist() const
+		auto const& length_histogram() const
 		{ return m_length_hist; }
 
 		auto const& transtion_rates() const

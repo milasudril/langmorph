@@ -26,4 +26,15 @@ TESTCASE(wordgen_wordstats_load)
 	words.push("är");
 
 	wordgen::word_stats stats{words, load(std::type_identity<wordgen::letter_group_index>{}, letter_groups_in)};
+
+	auto const& length_hist = stats.length_histogram();
+	auto const largest_index = length_hist.largest_index();
+	EXPECT_EQ(largest_index, wordgen::histogram_index{6});
+	EXPECT_EQ(length_hist(wordgen::histogram_index{6}), 1);
+	EXPECT_EQ(length_hist(wordgen::histogram_index{5}), 0);
+	EXPECT_EQ(length_hist(wordgen::histogram_index{4}), 0);
+	EXPECT_EQ(length_hist(wordgen::histogram_index{3}), 1);
+	EXPECT_EQ(length_hist(wordgen::histogram_index{2}), 0);
+	EXPECT_EQ(length_hist(wordgen::histogram_index{1}), 0);
+	EXPECT_EQ(length_hist(wordgen::histogram_index{0}), 0);
 }
