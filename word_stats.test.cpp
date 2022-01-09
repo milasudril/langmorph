@@ -1,6 +1,6 @@
-//@	{"target":{"name":"wordstats.test", "actions":["run"]}}
+//@	{"target":{"name":"word_stats.test", "actions":["run"]}}
 
-#include "./wordstats.hpp"
+#include "./word_stats.hpp"
 
 #include "testfwk/testfwk.hpp"
 
