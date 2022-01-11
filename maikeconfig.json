@@ -10,7 +10,8 @@
                 "compiler": {
                     "config": {
                         "cflags": [
-                            "-O3"
+                            "-O3",
+                            "-g"
                         ],
                          "std_revision":{
 							"min":"c++20"
@@ -27,6 +28,9 @@
                     "config": {
                         "cflags": [
                             "-O3",
+                            "-Wextra",
+                            "-Werror",
+                            "-g",
                             "-Wall"
                         ],
                         "iquote": [

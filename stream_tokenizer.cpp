@@ -14,7 +14,7 @@ namespace
 		return (static_cast<char>(ch_in) >= '\0' && static_cast<char>(ch_in) < '0')
 			|| (static_cast<char>(ch_in) >= ':' && static_cast<char>(ch_in) < 'A')
 			|| (static_cast<char>(ch_in) >= '[' && static_cast<char>(ch_in) < 'a')
-			|| (static_cast<char>(ch_in) >= '{' && static_cast<char>(ch_in) <= 0x7f);
+			|| (static_cast<char>(ch_in) >= '{');
 	}
 
 	int eat_whitespace(FILE* src)

@@ -20,10 +20,10 @@ TESTCASE(wordgen_wordstats_load)
 	letter_groups_in.push(wordgen::letter_group{"g"});
 	letter_groups_in.push(wordgen::letter_group{"r"});
 
-	std::queue<std::string> words;
-	words.push("schlager");
-	words.push("hej");
-	words.push("är");
+	std::queue<std::array<std::string,1>> words;
+	words.push(std::array<std::string, 1>{"schlager"});
+	words.push(std::array<std::string, 1>{"hej"});
+	words.push(std::array<std::string, 1>{"är"});
 
 	auto letter_groups = load(std::type_identity<wordgen::letter_group_index>{}, letter_groups_in);
 
