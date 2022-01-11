@@ -30,10 +30,18 @@ int main(int argc, char** argv)
 
 	std::mt19937 rng;
 
-	for(size_t k = 0; k != 128; ++k)
+	for(size_t k = 0; k != 1024; ++k)
 	{
 		auto length = word_length(rng);
-		printf("%zu\n", length);
+		auto current_group = letter_group_probs.col(0, rng);
+		std::string word{letter_groups.get(wordgen::letter_group_id{current_group}).value()};
+		assert(length != 0);
+		for(size_t l = 1; l != length; ++l)
+		{
+			current_group = letter_group_probs.col(current_group, rng);
+			word += letter_groups.get(wordgen::letter_group_id{current_group}).value();
+		}
+		puts(word.c_str());
 	}
 
 	return 0;

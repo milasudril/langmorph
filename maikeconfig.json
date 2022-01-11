@@ -10,7 +10,7 @@
                 "compiler": {
                     "config": {
                         "cflags": [
-                            "-g"
+                            "-O3"
                         ],
                          "std_revision":{
 							"min":"c++20"
@@ -26,7 +26,7 @@
                 "compiler": {
                     "config": {
                         "cflags": [
-                            "-g",
+                            "-O3",
                             "-Wall"
                         ],
                         "iquote": [
@@ -50,7 +50,7 @@
                             "run"
                         ],
                         "cflags": [
-                            "-g",
+                            "-O3",
                             "-Wall"
                         ],
                         "std_revision":{
