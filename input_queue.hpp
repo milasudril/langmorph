@@ -35,6 +35,13 @@ namespace wordgen
 			m_stop = true;
 		}
 
+		void push(T&& obj)
+		{
+			std::lock_guard lock{m_mtx};
+			m_fifo.push(std::move(obj));
+			m_cv.notify_one();
+		}
+
 	private:
 		mutable std::mutex m_mtx;
 		mutable std::condition_variable m_cv;

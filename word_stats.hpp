@@ -3,6 +3,9 @@
 
 #include "./stat_counters.hpp"
 #include "./letter_group_index.hpp"
+#include "./input_queue.hpp"
+
+#include <thread>
 
 namespace wordgen
 {
@@ -43,6 +46,27 @@ namespace wordgen
 		wordgen::histogram m_length_hist;
 		transition_rate_table m_transition_rates;
 	};
+
+	template<class TokenStream>
+	void load(TokenStream&& words, letter_group_index const& letter_groups)
+	{
+		std::array<std::jthread, 16> workers;
+		std::array<input_queue<std::string>, 16> fifos;
+		for(size_t k = 0; k != std::size(workers); ++k)
+		{
+			workers[k] = std::jthread([](auto& fifo, auto const& letter_groups){
+				word_stats stats{fifo, letter_groups};
+			}, std::ref(fifos[k]));
+		}
+
+		size_t k = 0;
+		while(!words.empty())
+		{
+			fifos[k % 16].push(std::move(words.front()));
+			words.pop();
+			++k;
+		}
+	}
 }
 
 #endif
