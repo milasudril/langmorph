@@ -1,3 +1,5 @@
+//@{"dependencies_extra":[{"ref":"pthread", "rel":"external", "origin": "system"}]}
+
 #ifndef WORDGEN_WORDSTATS_HPP
 #define WORDGEN_WORDSTATS_HPP
 
@@ -48,23 +50,28 @@ namespace wordgen
 	};
 
 	template<class TokenStream>
-	void load(TokenStream&& words, letter_group_index const& letter_groups)
+	void load(std::type_identity<word_stats>, TokenStream&& words, letter_group_index const& letter_groups)
 	{
 		std::array<std::jthread, 16> workers;
 		std::array<input_queue<std::string>, 16> fifos;
 		for(size_t k = 0; k != std::size(workers); ++k)
 		{
-			workers[k] = std::jthread([](auto& fifo, auto const& letter_groups){
+			workers[k] = std::jthread([&fifo = fifos[k], &letter_groups](){
 				word_stats stats{fifo, letter_groups};
-			}, std::ref(fifos[k]));
+			});
 		}
 
-		size_t k = 0;
+		size_t wordcount = 0;
 		while(!words.empty())
 		{
-			fifos[k % 16].push(std::move(words.front()));
+			fifos[wordcount % 16].push(std::move(words.front()));
 			words.pop();
-			++k;
+			++wordcount;
+		}
+
+		for(size_t k = 0; k != std::size(fifos); ++k)
+		{
+			fifos[k].terminate();
 		}
 	}
 }

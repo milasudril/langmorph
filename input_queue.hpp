@@ -11,12 +11,12 @@ namespace wordgen
 	class input_queue
 	{
 	public:
-		T&& front()
+		T front()
 		{
 			std::lock_guard lock{m_mtx};
 			auto ret = std::move(m_fifo.front());
 			m_fifo.pop();
-			return std::move(ret);
+			return ret;
 		}
 
 		void pop(){}
@@ -25,7 +25,7 @@ namespace wordgen
 		{
 			std::unique_lock lock{m_mtx};
 			m_cv.wait(lock, [this](){
-				return m_fifo.empty() || m_stop;
+				return !m_fifo.empty() || m_stop;
 			});
 			return m_stop;
 		}
