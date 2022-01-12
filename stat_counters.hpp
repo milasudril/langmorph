@@ -4,6 +4,7 @@
 #include <memory>
 #include <span>
 #include <algorithm>
+#include <cassert>
 
 namespace wordgen
 {
@@ -67,6 +68,16 @@ namespace wordgen
 			return m_size;
 		}
 
+		transition_rate_table& operator+=(transition_rate_table const& other)
+		{
+			assert(m_size == other.m_size);
+			std::transform(m_counts.get(), m_counts.get() + m_size,
+						   other.m_counts.get(), m_counts.get(), [](auto a, auto b) {
+				return a + b;
+			});
+			return *this;
+		}
+
 	private:
 		std::unique_ptr<size_t[]> m_counts;
 		size_t m_size;
@@ -120,6 +131,15 @@ namespace wordgen
 		auto largest_index() const
 		{
 			return histogram_index{m_size - 1};
+		}
+
+		histogram& operator+=(histogram const& other)
+		{
+			for(size_t k = 0; k != other.m_size; ++k)
+			{
+				(*this)(histogram_index{k}) += other.m_counts[k];
+			}
+			return *this;
 		}
 
 	private:

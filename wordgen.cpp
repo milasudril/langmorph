@@ -21,13 +21,8 @@ int main(int argc, char** argv)
 		return load(std::type_identity<wordgen::letter_group_index>{}, wordgen::stream_tokenizer{file});
 	});
 
-	wordgen::load(argv[2], [&letter_groups](auto file) {
-		load(std::type_identity<wordgen::word_stats>{}, wordgen::stream_tokenizer{file}, letter_groups);
-	});
-
-#if 0
 	auto word_stats = wordgen::load(argv[2], [&letter_groups](auto file) {
-		return wordgen::word_stats{wordgen::stream_tokenizer{file}, letter_groups};
+		return load(std::type_identity<wordgen::word_stats>{}, wordgen::stream_tokenizer{file}, letter_groups);
 	});
 
 	auto word_length = wordgen::gen_pmf(word_stats.length_histogram()());
@@ -48,8 +43,6 @@ int main(int argc, char** argv)
 		}
 		puts(word.c_str());
 	}
-#endif
-
 
 	return 0;
 }

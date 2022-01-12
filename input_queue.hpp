@@ -33,6 +33,7 @@ namespace wordgen
 		void terminate()
 		{
 			m_stop = true;
+			m_cv.notify_one();
 		}
 
 		void push(T&& obj)
