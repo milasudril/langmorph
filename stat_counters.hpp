@@ -71,7 +71,7 @@ namespace wordgen
 		transition_rate_table& operator+=(transition_rate_table const& other)
 		{
 			assert(m_size == other.m_size);
-			std::transform(m_counts.get(), m_counts.get() + m_size,
+			std::transform(m_counts.get(), m_counts.get() + m_size * m_size,
 						   other.m_counts.get(), m_counts.get(), [](auto a, auto b) {
 				return a + b;
 			});

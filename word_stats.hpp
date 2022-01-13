@@ -68,7 +68,7 @@ namespace wordgen
 	}
 
 
-	constexpr size_t num_workers = 16;
+	constexpr size_t num_workers = 1;
 
 	std::vector<word_stats> create_word_stats(size_t size)
 	{

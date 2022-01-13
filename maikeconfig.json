@@ -54,7 +54,7 @@
                             "run"
                         ],
                         "cflags": [
-                            "-O3",
+                            "-g",
                             "-Wall"
                         ],
                         "std_revision":{

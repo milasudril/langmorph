@@ -48,6 +48,37 @@ TESTCASE(wordgen_statcounters_transition_rate_table)
 	}
 }
 
+TESTCASE(wordgen_statcounters_transition_rate_table_sum)
+{
+	wordgen::transition_rate_table a{4};
+	for(size_t k = 0; k != 4; ++k)
+	{
+		for(size_t l = 0; l!= 4; ++l)
+		{
+			a(wordgen::from_id{k}, wordgen::to_id{l}) = k*4 + l;
+		}
+	}
+
+	wordgen::transition_rate_table b{4};
+	for(size_t k = 0; k != 4; ++k)
+	{
+		for(size_t l = 0; l!= 4; ++l)
+		{
+			b(wordgen::from_id{k}, wordgen::to_id{l}) = k*4 + l;
+		}
+	}
+
+	a += b;
+
+	for(size_t k = 0; k != 4; ++k)
+	{
+		for(size_t l = 0; l!= 4; ++l)
+		{
+			EXPECT_EQ(a(wordgen::from_id{k}, wordgen::to_id{l}), 2*(k*4 + l));
+		}
+	}
+}
+
 TESTCASE(wordgen_statcounters_histogram_insert_values)
 {
 	wordgen::histogram hist;
@@ -77,4 +108,28 @@ TESTCASE(wordgen_statcounters_histogram_insert_values_sparse)
 	auto const vals = hist();
 	EXPECT_EQ(std::all_of(std::begin(vals), std::end(vals) - 2, [](auto val){return val == 0;}), true);
 	EXPECT_EQ(*(std::end(vals) - 1), 1);
+}
+
+TESTCASE(wordgen_statcounters_histogram_sum) {
+	wordgen::histogram a;
+
+	a(wordgen::histogram_index{0}) = 1;
+	a(wordgen::histogram_index{1}) = 2;
+	a(wordgen::histogram_index{2}) = 3;
+
+	wordgen::histogram b;
+	b(wordgen::histogram_index{0}) = 3;
+	b(wordgen::histogram_index{1}) = 2;
+	b(wordgen::histogram_index{2}) = 1;
+	b(wordgen::histogram_index{3}) = 4;
+
+	a += b;
+
+	auto vals = a();
+
+	EXPECT_EQ(std::size(vals), 4);
+	EXPECT_EQ(vals[0], 4);
+	EXPECT_EQ(vals[1], 4);
+	EXPECT_EQ(vals[2], 4);
+	EXPECT_EQ(vals[3], 4);
 }

@@ -13,6 +13,7 @@ namespace wordgen
 	{
 		if(std::ranges::all_of(counts, [](auto val){return val == 0;}))
 		{
+			fprintf(stdout, "Warning: got all zeros\n");
 			return std::discrete_distribution<size_t>{std::size(counts), 0.0, 1.0, [](auto){return 1.0;}};
 		}
 
