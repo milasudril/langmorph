@@ -42,7 +42,7 @@ namespace wordgen
 					});
 				}
 			}
-			printf("%zu\n", wordcount);
+			fprintf(stderr, "%zu\n", wordcount);
 		}
 
 		explicit word_stats(size_t transition_rates_size):m_transition_rates{transition_rates_size}{}
