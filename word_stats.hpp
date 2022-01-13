@@ -19,13 +19,15 @@ namespace wordgen
 		explicit word_stats(TokenStream&& words, letter_group_index const& letter_groups):
 			m_transition_rates{std::size(letter_groups)}
 		{
+			size_t wordcount = 0;
 			while(!words.empty())
 			{
 				auto word = std::move(words.front());
 				words.pop();
-				for(size_t k = 0; k != std::size(word); ++k)
+				++wordcount;
+			//	for(size_t k = 0; k != std::size(word); ++k)
 				{
-					auto word_split = split_longest(word[k], letter_groups);
+					auto word_split = split_longest(word, letter_groups);
 					if(std::size(word_split) < 3)
 					{ continue; }
 
@@ -40,6 +42,7 @@ namespace wordgen
 					});
 				}
 			}
+			printf("%zu\n", wordcount);
 		}
 
 		explicit word_stats(size_t transition_rates_size):m_transition_rates{transition_rates_size}{}
@@ -68,7 +71,7 @@ namespace wordgen
 	}
 
 
-	constexpr size_t num_workers = 1;
+	constexpr size_t num_workers = 16;
 
 	std::vector<word_stats> create_word_stats(size_t size)
 	{
@@ -80,8 +83,7 @@ namespace wordgen
 	template<class TokenStream>
 	word_stats load(std::type_identity<word_stats>, TokenStream&& words, letter_group_index const& letter_groups)
 	{
-		constexpr size_t buffer_size = 1;
-		using buffer_type = std::array<std::string, buffer_size>;
+		using buffer_type = std::string;
 		std::array<input_queue<buffer_type>, num_workers> fifos;
 		auto stats = create_word_stats(std::size(letter_groups));
 
@@ -95,33 +97,29 @@ namespace wordgen
 			}
 
 			size_t thread_index = 0;
-			size_t buffer_index = 0;
-			buffer_type buffer;
 			size_t wordcount = 0;
 			while(!words.empty())
 			{
-				buffer[buffer_index % std::size(buffer)] = std::move(words.front());
+				fifos[thread_index % std::size(workers)].push(std::move(words.front()));
+				++thread_index;
 				words.pop();
-				++buffer_index;
-				if(buffer_index % std::size(buffer) == 0)
-				{
-					fifos[thread_index % std::size(workers)].push(std::move(buffer));
-					++thread_index;
-				}
-
+#if 0
 				if(wordcount % (1024*1024*4) == 0)
 				{
 					fprintf(stderr, "\rwordcount: %zu", wordcount);
 					fflush(stderr);
 				}
+#endif
 				++wordcount;
 			}
 
-			fprintf(stderr, "\n Completed\n");
+			fprintf(stderr, "\n Completed %zu\n", wordcount);
+#if 1
 			for(size_t k = 0; k != std::size(fifos); ++k)
 			{
 				fifos[k].terminate();
 			}
+#endif
 		}
 
 		return std::accumulate(std::begin(stats), std::end(stats), word_stats{std::size(letter_groups)});

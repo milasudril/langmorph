@@ -11,6 +11,8 @@ namespace wordgen
 	class input_queue
 	{
 	public:
+		input_queue():m_stop{false}{}
+
 		T front()
 		{
 			std::lock_guard lock{m_mtx};
@@ -27,11 +29,12 @@ namespace wordgen
 			m_cv.wait(lock, [this](){
 				return !m_fifo.empty() || m_stop;
 			});
-			return m_stop;
+			return m_stop && m_fifo.empty();
 		}
 
 		void terminate()
 		{
+			std::lock_guard lock{m_mtx};
 			m_stop = true;
 			m_cv.notify_one();
 		}
@@ -47,7 +50,7 @@ namespace wordgen
 		mutable std::mutex m_mtx;
 		mutable std::condition_variable m_cv;
 		std::queue<T> m_fifo;
-		std::atomic<bool> m_stop;
+		bool m_stop;
 	};
 }
 
