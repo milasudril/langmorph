@@ -25,7 +25,7 @@ namespace wordgen
 				auto word = std::move(words.front());
 				words.pop();
 				++wordcount;
-				process_word(word, letter_groups);
+				process(word, letter_groups);
 			}
 			fprintf(stderr, "%zu\n", wordcount);
 		}
@@ -45,7 +45,7 @@ namespace wordgen
 			return *this;
 		}
 
-		void process_word(std::string_view word, letter_group_index const& letter_groups)
+		void process(std::string_view word, letter_group_index const& letter_groups)
 		{
 			assert(std::size(letter_groups) == m_transition_rates.node_count());
 
@@ -61,6 +61,14 @@ namespace wordgen
 				auto to = letter_groups.get(letter_group);
 				++tr(wordgen::from_id{from.value()}, wordgen::to_id{to.value()});
 				from = to;
+			});
+		}
+
+		void process(std::span<std::string const> word, letter_group_index const& letter_groups)
+		{
+			assert(std::size(letter_groups) == m_transition_rates.node_count());
+			std::ranges::for_each(word, [this, &letter_groups](auto const& item) {
+				process(item, letter_groups);
 			});
 		}
 
@@ -87,7 +95,7 @@ namespace wordgen
 	template<class TokenStream>
 	word_stats load(std::type_identity<word_stats>, TokenStream&& words, letter_group_index const& letter_groups)
 	{
-		using buffer_type = std::string;
+		using buffer_type = std::vector<std::string>;
 		std::array<input_queue<buffer_type>, num_workers> fifos;
 		auto stats = create_word_stats(std::size(letter_groups));
 
@@ -104,7 +112,7 @@ namespace wordgen
 			size_t wordcount = 0;
 			while(!words.empty())
 			{
-				fifos[thread_index % std::size(workers)].push(std::move(words.front()));
+				fifos[thread_index % std::size(workers)].push(std::vector{std::move(words.front())});
 				++thread_index;
 				words.pop();
 #if 0
@@ -118,12 +126,11 @@ namespace wordgen
 			}
 
 			fprintf(stderr, "\n Completed %zu\n", wordcount);
-#if 1
+
 			for(size_t k = 0; k != std::size(fifos); ++k)
 			{
 				fifos[k].terminate();
 			}
-#endif
 		}
 
 		return std::accumulate(std::begin(stats), std::end(stats), word_stats{std::size(letter_groups)});
