@@ -4,11 +4,11 @@
 
 #include "testfwk/testfwk.hpp"
 
-TESTCASE(wordgen_gen_pmf_all_zeros)
+TESTCASE(langmorph_gen_pmf_all_zeros)
 {
 	std::array<size_t, 4> counts{0, 0, 0, 0};
 
-	auto pmf = wordgen::gen_pmf(counts);
+	auto pmf = langmorph::gen_pmf(counts);
 
 	auto weights = pmf.probabilities();
 	REQUIRE_EQ(std::size(weights), 4);
@@ -18,11 +18,11 @@ TESTCASE(wordgen_gen_pmf_all_zeros)
 	EXPECT_EQ(weights[3], 0.25);
 }
 
-TESTCASE(wordgen_gen_pmf_one_zero)
+TESTCASE(langmorph_gen_pmf_one_zero)
 {
 	std::array<size_t, 4> counts{1, 2, 1, 0};
 
-	auto pmf = wordgen::gen_pmf(counts);
+	auto pmf = langmorph::gen_pmf(counts);
 
 	auto weights = pmf.probabilities();
 	REQUIRE_EQ(std::size(weights), 4);
@@ -48,13 +48,13 @@ namespace
 	};
 }
 
-TESTCASE(wordgen_bivar_probability_distribution)
+TESTCASE(langmorph_bivar_probability_distribution)
 {
 	count_source src;
 	src.rows[0] = std::array<size_t, 4>{1, 2, 1, 0};
 	src.rows[1] = std::array<size_t, 4>{0, 0, 0};
 
-	wordgen::bivar_discrete_distribution obj{src};
+	langmorph::bivar_discrete_distribution obj{src};
 	REQUIRE_EQ(obj.row_count(), 2);
 
 	auto const weights_1 = obj.probabilities(0);

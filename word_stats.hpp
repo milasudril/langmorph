@@ -1,7 +1,7 @@
 //@{"dependencies_extra":[{"ref":"pthread", "rel":"external", "origin": "system"}]}
 
-#ifndef WORDGEN_WORDSTATS_HPP
-#define WORDGEN_WORDSTATS_HPP
+#ifndef LANGMORPH_WORDSTATS_HPP
+#define LANGMORPH_WORDSTATS_HPP
 
 #include "./stat_counters.hpp"
 #include "./letter_group_index.hpp"
@@ -10,7 +10,7 @@
 #include <thread>
 #include <numeric>
 
-namespace wordgen
+namespace langmorph
 {
 	class word_stats
 	{
@@ -53,13 +53,13 @@ namespace wordgen
 			if(std::size(word_split) < 3)
 			{ return; }
 
-			++m_length_hist(wordgen::histogram_index{std::size(word_split)});
+			++m_length_hist(langmorph::histogram_index{std::size(word_split)});
 			std::ranges::for_each(word_split,
 								[from = letter_groups.get(" "),
 								&letter_groups,
 								&tr = m_transition_rates](auto letter_group) mutable {
 				auto to = letter_groups.get(letter_group);
-				++tr(wordgen::from_id{from.value()}, wordgen::to_id{to.value()});
+				++tr(langmorph::from_id{from.value()}, langmorph::to_id{to.value()});
 				from = to;
 			});
 		}
@@ -73,7 +73,7 @@ namespace wordgen
 		}
 
 	private:
-		wordgen::histogram m_length_hist;
+		langmorph::histogram m_length_hist;
 		transition_rate_table m_transition_rates;
 	};
 

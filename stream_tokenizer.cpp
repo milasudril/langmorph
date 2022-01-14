@@ -32,7 +32,7 @@ namespace
 
 }
 
-void wordgen::stream_tokenizer::pop()
+void langmorph::stream_tokenizer::pop()
 {
 	if(m_src == nullptr)
 	{ return; }

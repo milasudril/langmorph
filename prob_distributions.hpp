@@ -1,5 +1,5 @@
-#ifndef WORDGEN_PROBDISTRIBUTIONS_HPP
-#define WORDGEN_PROBDISTRIBUTIONS_HPP
+#ifndef LANGMORPH_PROBDISTRIBUTIONS_HPP
+#define LANGMORPH_PROBDISTRIBUTIONS_HPP
 
 #include <random>
 #include <algorithm>
@@ -7,7 +7,7 @@
 #include <memory>
 #include <cassert>
 
-namespace wordgen
+namespace langmorph
 {
 	auto gen_pmf(std::span<size_t const> counts)
 	{

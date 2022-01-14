@@ -1,0 +1,4 @@
+{
+	 "target":{"name":"langmorph"}
+	,"dependencies":[{"ref":"langmorph.o","rel":"implementation"}]
+}

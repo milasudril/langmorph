@@ -1,11 +1,11 @@
-#ifndef WORDGEN_LETTERGROUP_HPP
-#define WORDGEN_LETTERGROUP_HPP
+#ifndef LANGMORPH_LETTERGROUP_HPP
+#define LANGMORPH_LETTERGROUP_HPP
 
 #include <string>
 #include <type_traits>
 #include <vector>
 
-namespace wordgen
+namespace langmorph
 {
 	class letter_group
 	{

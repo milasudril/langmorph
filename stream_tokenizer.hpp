@@ -1,12 +1,12 @@
 //@{"dependencies_extra":[{"ref":"stream_tokenizer.o","rel":"implementation"}]}
 
-#ifndef WORDGEN_STREAMTOKENIZER_HPP
-#define WORDGEN_STREAMTOKENIZER_HPP
+#ifndef LANGMORPH_STREAMTOKENIZER_HPP
+#define LANGMORPH_STREAMTOKENIZER_HPP
 
 #include <cstdio>
 #include <string>
 
-namespace wordgen
+namespace langmorph
 {
 	class stream_tokenizer
 	{

@@ -1,12 +1,12 @@
-#ifndef WORDGEN_LETTERGROUPINDEX_HPP
-#define WORDGEN_LETTERGROUPINDEX_HPP
+#ifndef LANGMORPH_LETTERGROUPINDEX_HPP
+#define LANGMORPH_LETTERGROUPINDEX_HPP
 
 #include "./letter_group.hpp"
 
 #include <cassert>
 #include <map>
 
-namespace wordgen
+namespace langmorph
 {
 	class letter_group_id
 	{

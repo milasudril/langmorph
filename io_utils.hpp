@@ -1,10 +1,10 @@
-#ifndef WORDGEN_IOUTILS_HPP
-#define WORDGEN_IOUTILS_HPP
+#ifndef LANGMORPH_IOUTILS_HPP
+#define LANGMORPH_IOUTILS_HPP
 
 #include <cstdio>
 #include <memory>
 
-namespace wordgen
+namespace langmorph
 {
 	struct file_deleter
 	{
@@ -26,7 +26,7 @@ namespace wordgen
 	template<class T, class ... Args>
 	auto load(char const* filename, T&& loader, Args... args)
 	{
-		auto input_file = wordgen::create_file(filename, "rb");
+		auto input_file = langmorph::create_file(filename, "rb");
 		return loader(input_file.get(), std::forward<Args>(args)...);
 	}
 

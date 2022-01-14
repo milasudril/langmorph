@@ -1,12 +1,12 @@
-#ifndef WORDGEN_STATCOUNTERS_HPP
-#define WORDGEN_STATCOUNTERS_HPP
+#ifndef LANGMORPH_STATCOUNTERS_HPP
+#define LANGMORPH_STATCOUNTERS_HPP
 
 #include <memory>
 #include <span>
 #include <algorithm>
 #include <cassert>
 
-namespace wordgen
+namespace langmorph
 {
 	class from_id
 	{

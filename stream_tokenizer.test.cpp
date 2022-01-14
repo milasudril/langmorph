@@ -5,11 +5,11 @@
 
 #include "testfwk/testfwk.hpp"
 
-TESTCASE(wordgen_stream_tokenizer_read_data)
+TESTCASE(langmorph_stream_tokenizer_read_data)
 {
-	auto handle = wordgen::create_file("testdata/input_file.txt", "rb");
+	auto handle = langmorph::create_file("testdata/input_file.txt", "rb");
 
-	wordgen::stream_tokenizer tok{handle.get()};
+	langmorph::stream_tokenizer tok{handle.get()};
 	EXPECT_EQ(tok.empty(), false);
 	std::vector<std::string> output;
 	while(!tok.empty())

@@ -1,11 +1,11 @@
-#ifndef WORDGEN_INPUTQUEUE_HPP
-#define WORDGEN_INPUTQUEUE_HPP
+#ifndef LANGMORPH_INPUTQUEUE_HPP
+#define LANGMORPH_INPUTQUEUE_HPP
 
 #include <queue>
 #include <mutex>
 #include <condition_variable>
 
-namespace wordgen
+namespace langmorph
 {
 	template<class T>
 	class input_queue

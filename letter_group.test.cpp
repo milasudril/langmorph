@@ -7,13 +7,13 @@
 #include <set>
 #include <queue>
 
-TESTCASE(wordgen_letter_group_create)
+TESTCASE(langmorph_letter_group_create)
 {
-	wordgen::letter_group foo{"aa"};
+	langmorph::letter_group foo{"aa"};
 	auto bar = foo;
 	EXPECT_EQ(foo, bar);
 
-	bar = wordgen::letter_group{"bb"};
+	bar = langmorph::letter_group{"bb"};
 	EXPECT_NE(foo, bar);
 
 	EXPECT_EQ(foo.value(), "aa");
@@ -25,30 +25,30 @@ namespace
 	{
 		using is_transparent = int;
 
-		bool operator()(wordgen::letter_group const& a, wordgen::letter_group const& b) const
+		bool operator()(langmorph::letter_group const& a, langmorph::letter_group const& b) const
 		{
 			return a.value() < b.value();
 		}
 
-		bool operator()(wordgen::letter_group const& a, std::string_view b) const
+		bool operator()(langmorph::letter_group const& a, std::string_view b) const
 		{
 			return a.value() < b;
 		}
 
-		bool operator()(std::string_view a, wordgen::letter_group const& b) const
+		bool operator()(std::string_view a, langmorph::letter_group const& b) const
 		{
 			return a < b.value();
 		}
 	};
 }
 
-TESTCASE(wordgen_letter_group_split_word)
+TESTCASE(langmorph_letter_group_split_word)
 {
-	const std::set<wordgen::letter_group, letter_group_cmp> letter_groups{
-		wordgen::letter_group{"k"},
-		wordgen::letter_group{"a"},
-		wordgen::letter_group{"ll"},
-		wordgen::letter_group{"e"}
+	const std::set<langmorph::letter_group, letter_group_cmp> letter_groups{
+		langmorph::letter_group{"k"},
+		langmorph::letter_group{"a"},
+		langmorph::letter_group{"ll"},
+		langmorph::letter_group{"e"}
 	};
 
 	auto token = next_group_longest(std::string_view{"kalle"}, letter_groups);
@@ -62,13 +62,13 @@ TESTCASE(wordgen_letter_group_split_word)
 	EXPECT_EQ(std::size(token.second), 0);
 }
 
-TESTCASE(wordgen_letter_group_split_word_unknown_letters)
+TESTCASE(langmorph_letter_group_split_word_unknown_letters)
 {
-	std::set<wordgen::letter_group, letter_group_cmp> letter_groups{
-		wordgen::letter_group{"k"},
-		wordgen::letter_group{"a"},
-		wordgen::letter_group{"ll"},
-		wordgen::letter_group{"e"}
+	std::set<langmorph::letter_group, letter_group_cmp> letter_groups{
+		langmorph::letter_group{"k"},
+		langmorph::letter_group{"a"},
+		langmorph::letter_group{"ll"},
+		langmorph::letter_group{"e"}
 	};
 
 	auto token = next_group_longest(std::string_view{"bad"}, letter_groups);
@@ -76,13 +76,13 @@ TESTCASE(wordgen_letter_group_split_word_unknown_letters)
 	EXPECT_EQ(std::size(token.second), 0);
 }
 
-TESTCASE(wordgen_letter_group_split_word_unknown_letters_not_begin)
+TESTCASE(langmorph_letter_group_split_word_unknown_letters_not_begin)
 {
-	const std::set<wordgen::letter_group, letter_group_cmp> letter_groups{
-		wordgen::letter_group{"k"},
-		wordgen::letter_group{"a"},
-		wordgen::letter_group{"ll"},
-		wordgen::letter_group{"e"}
+	const std::set<langmorph::letter_group, letter_group_cmp> letter_groups{
+		langmorph::letter_group{"k"},
+		langmorph::letter_group{"a"},
+		langmorph::letter_group{"ll"},
+		langmorph::letter_group{"e"}
 	};
 
 	auto const sv = std::string_view{"kolla"};
@@ -96,19 +96,19 @@ TESTCASE(wordgen_letter_group_split_word_unknown_letters_not_begin)
 	EXPECT_EQ(std::size(groups), 0);
 }
 
-TESTCASE(wordgen_letter_group_split_word_match_longest)
+TESTCASE(langmorph_letter_group_split_word_match_longest)
 {
-	const std::set<wordgen::letter_group, letter_group_cmp> letter_groups{
-		wordgen::letter_group{"sch"},
-		wordgen::letter_group{"s"},
-		wordgen::letter_group{"c"},
-		wordgen::letter_group{"h"},
-		wordgen::letter_group{"e"},
-		wordgen::letter_group{"j"},
-		wordgen::letter_group{"l"},
-		wordgen::letter_group{"a"},
-		wordgen::letter_group{"g"},
-		wordgen::letter_group{"r"},
+	const std::set<langmorph::letter_group, letter_group_cmp> letter_groups{
+		langmorph::letter_group{"sch"},
+		langmorph::letter_group{"s"},
+		langmorph::letter_group{"c"},
+		langmorph::letter_group{"h"},
+		langmorph::letter_group{"e"},
+		langmorph::letter_group{"j"},
+		langmorph::letter_group{"l"},
+		langmorph::letter_group{"a"},
+		langmorph::letter_group{"g"},
+		langmorph::letter_group{"r"},
 	};
 
 	auto const sv = std::string_view{"schlager"};
@@ -136,19 +136,19 @@ TESTCASE(wordgen_letter_group_split_word_match_longest)
 	EXPECT_EQ(groups[5], "r");
 }
 
-TESTCASE(wordgen_letter_group_split_word_match_shortest)
+TESTCASE(langmorph_letter_group_split_word_match_shortest)
 {
-	const std::set<wordgen::letter_group, letter_group_cmp> letter_groups{
-		wordgen::letter_group{"sch"},
-		wordgen::letter_group{"s"},
-		wordgen::letter_group{"c"},
-		wordgen::letter_group{"h"},
-		wordgen::letter_group{"e"},
-		wordgen::letter_group{"j"},
-		wordgen::letter_group{"l"},
-		wordgen::letter_group{"a"},
-		wordgen::letter_group{"g"},
-		wordgen::letter_group{"r"},
+	const std::set<langmorph::letter_group, letter_group_cmp> letter_groups{
+		langmorph::letter_group{"sch"},
+		langmorph::letter_group{"s"},
+		langmorph::letter_group{"c"},
+		langmorph::letter_group{"h"},
+		langmorph::letter_group{"e"},
+		langmorph::letter_group{"j"},
+		langmorph::letter_group{"l"},
+		langmorph::letter_group{"a"},
+		langmorph::letter_group{"g"},
+		langmorph::letter_group{"r"},
 	};
 
 	auto token = next_group_shortest(std::string_view{"schlager"}, letter_groups);
@@ -170,39 +170,39 @@ TESTCASE(wordgen_letter_group_split_word_match_shortest)
 	EXPECT_EQ(std::size(token.second), 0);
 }
 
-TESTCASE(wordgen_letter_group_load)
+TESTCASE(langmorph_letter_group_load)
 {
-	std::queue<wordgen::letter_group> letter_groups_in;
+	std::queue<langmorph::letter_group> letter_groups_in;
 
-	letter_groups_in.push(wordgen::letter_group{"sch"});
-	letter_groups_in.push(wordgen::letter_group{"s"});
-	letter_groups_in.push(wordgen::letter_group{"c"});
-	letter_groups_in.push(wordgen::letter_group{"h"});
-	letter_groups_in.push(wordgen::letter_group{"e"});
-	letter_groups_in.push(wordgen::letter_group{"j"});
-	letter_groups_in.push(wordgen::letter_group{"l"});
-	letter_groups_in.push(wordgen::letter_group{"a"});
-	letter_groups_in.push(wordgen::letter_group{"g"});
-	letter_groups_in.push(wordgen::letter_group{"r"});
+	letter_groups_in.push(langmorph::letter_group{"sch"});
+	letter_groups_in.push(langmorph::letter_group{"s"});
+	letter_groups_in.push(langmorph::letter_group{"c"});
+	letter_groups_in.push(langmorph::letter_group{"h"});
+	letter_groups_in.push(langmorph::letter_group{"e"});
+	letter_groups_in.push(langmorph::letter_group{"j"});
+	letter_groups_in.push(langmorph::letter_group{"l"});
+	letter_groups_in.push(langmorph::letter_group{"a"});
+	letter_groups_in.push(langmorph::letter_group{"g"});
+	letter_groups_in.push(langmorph::letter_group{"r"});
 
-	using storage = std::set<wordgen::letter_group, letter_group_cmp>;
+	using storage = std::set<langmorph::letter_group, letter_group_cmp>;
 
 	auto letter_groups_out = load(std::type_identity<storage>{}, letter_groups_in);
 	static_assert(std::is_same_v<storage, decltype(letter_groups_out)>);
 
 	EXPECT_EQ(std::size(letter_groups_in), 0);
 
-	const std::set<wordgen::letter_group, letter_group_cmp> letter_groups_expected{
-		wordgen::letter_group{"sch"},
-		wordgen::letter_group{"s"},
-		wordgen::letter_group{"c"},
-		wordgen::letter_group{"h"},
-		wordgen::letter_group{"e"},
-		wordgen::letter_group{"j"},
-		wordgen::letter_group{"l"},
-		wordgen::letter_group{"a"},
-		wordgen::letter_group{"g"},
-		wordgen::letter_group{"r"},
+	const std::set<langmorph::letter_group, letter_group_cmp> letter_groups_expected{
+		langmorph::letter_group{"sch"},
+		langmorph::letter_group{"s"},
+		langmorph::letter_group{"c"},
+		langmorph::letter_group{"h"},
+		langmorph::letter_group{"e"},
+		langmorph::letter_group{"j"},
+		langmorph::letter_group{"l"},
+		langmorph::letter_group{"a"},
+		langmorph::letter_group{"g"},
+		langmorph::letter_group{"r"},
 	};
 
 	EXPECT_EQ(std::ranges::equal(letter_groups_out, letter_groups_expected), true);
