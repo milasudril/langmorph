@@ -25,22 +25,7 @@ namespace wordgen
 				auto word = std::move(words.front());
 				words.pop();
 				++wordcount;
-			//	for(size_t k = 0; k != std::size(word); ++k)
-				{
-					auto word_split = split_longest(word, letter_groups);
-					if(std::size(word_split) < 3)
-					{ continue; }
-
-					++m_length_hist(wordgen::histogram_index{std::size(word_split)});
-					std::ranges::for_each(word_split,
-										[from = letter_groups.get(" "),
-										&letter_groups,
-										&tr = m_transition_rates](auto letter_group) mutable {
-						auto to = letter_groups.get(letter_group);
-						++tr(wordgen::from_id{from.value()}, wordgen::to_id{to.value()});
-						from = to;
-					});
-				}
+				process_word(word, letter_groups);
 			}
 			fprintf(stderr, "%zu\n", wordcount);
 		}
@@ -58,6 +43,25 @@ namespace wordgen
 			m_length_hist += other.m_length_hist;
 			m_transition_rates += other.m_transition_rates;
 			return *this;
+		}
+
+		void process_word(std::string_view word, letter_group_index const& letter_groups)
+		{
+			assert(std::size(letter_groups) == m_transition_rates.node_count());
+
+			auto word_split = split_longest(word, letter_groups);
+			if(std::size(word_split) < 3)
+			{ return; }
+
+			++m_length_hist(wordgen::histogram_index{std::size(word_split)});
+			std::ranges::for_each(word_split,
+								[from = letter_groups.get(" "),
+								&letter_groups,
+								&tr = m_transition_rates](auto letter_group) mutable {
+				auto to = letter_groups.get(letter_group);
+				++tr(wordgen::from_id{from.value()}, wordgen::to_id{to.value()});
+				from = to;
+			});
 		}
 
 	private:
