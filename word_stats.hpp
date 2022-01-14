@@ -83,7 +83,7 @@ namespace wordgen
 	}
 
 
-	constexpr size_t num_workers = 16;
+	constexpr size_t num_workers = 15;
 
 	std::vector<word_stats> create_word_stats(size_t size)
 	{
@@ -110,19 +110,30 @@ namespace wordgen
 
 			size_t thread_index = 0;
 			size_t wordcount = 0;
+			buffer_type buffer;
+			constexpr auto max_buffer_size = 4096/sizeof(std::string);
+			buffer.reserve(max_buffer_size);
 			while(!words.empty())
 			{
-				fifos[thread_index % std::size(workers)].push(std::vector{std::move(words.front())});
-				++thread_index;
-				words.pop();
-#if 0
-				if(wordcount % (1024*1024*4) == 0)
+				if(std::size(buffer) != max_buffer_size)
 				{
-					fprintf(stderr, "\rwordcount: %zu", wordcount);
-					fflush(stderr);
+					buffer.push_back(std::move(words.front()));
+					words.pop();
 				}
-#endif
+				else
+				{
+					fifos[thread_index % std::size(fifos)].push(std::move(buffer));
+					++thread_index;
+					buffer.push_back(std::move(words.front()));
+					words.pop();
+				}
+
 				++wordcount;
+			}
+
+			if(std::size(buffer) != 0)
+			{
+				fifos[thread_index % std::size(fifos)].push(std::move(buffer));
 			}
 
 			fprintf(stderr, "\n Completed %zu\n", wordcount);
