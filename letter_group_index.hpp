@@ -5,6 +5,8 @@
 
 #include <cassert>
 #include <map>
+#include <algorithm>
+#include <cstdio>
 
 namespace langmorph
 {
@@ -116,9 +118,11 @@ namespace langmorph
 		letter_group_id m_last_id;
 	};
 
-	template<class OutputStream>
-	void store(letter_group_index const&, OutputStream&&)
+	void store(letter_group_index const& letter_groups, FILE* f)
 	{
+		std::ranges::for_each(letter_groups.by_id(), [f](auto const& item){
+			fprintf(f, "%s\n", item.second.c_str());
+		});
 	}
 }
 

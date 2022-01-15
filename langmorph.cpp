@@ -88,6 +88,37 @@ int show_help(std::span<std::string_view const> args)
 	return show_help(args[0]);
 }
 
+class wad64_stdio_output
+{
+public:
+	static constexpr auto is_output = true;
+	static constexpr auto seek_set = Wad64::SeekMode::Set;
+	static constexpr auto seek_cur = Wad64::SeekMode::Cur;
+	static constexpr auto seek_end = Wad64::SeekMode::End;
+
+	template<class First, class ...Args>
+	explicit wad64_stdio_output(First&& first, Args&& ... args)
+		requires (!std::same_as<std::decay_t<First>, wad64_stdio_output>):
+		m_output{std::forward<First>(first), std::forward<Args>(args)...}
+	{}
+
+	decltype(auto) write(std::span<std::byte const> buffer)
+	{
+		return m_output.write(buffer);
+	}
+
+	decltype(auto) seek(int64_t offset, Wad64::SeekMode mode)
+	{
+		return m_output.seek(offset, mode);
+	}
+
+	static void close() {}
+
+
+private:
+	Wad64::OutputFile m_output;
+};
+
 void store(std::string_view statfile,
            langmorph::letter_group_index const& letter_groups,
            langmorph::word_stats const& word_stats)
@@ -100,13 +131,15 @@ void store(std::string_view statfile,
 		store_creation_mode};
 	Wad64::Archive archive{std::ref(output_file)};
 	{
-		Wad64::OutputFile output{std::ref(archive), "langmorph_data/letter_groups", store_creation_mode};
-		store(letter_groups, output);
+		wad64_stdio_output output{std::ref(archive), "langmorph_data/letter_groups", store_creation_mode};
+		auto output_file = langmorph::create_file(output);
+		store(letter_groups, output_file.first.get());
 	}
 
 	{
-		Wad64::OutputFile output{std::ref(archive), "langmorph_data/word_stats", store_creation_mode};
-		store(word_stats, output);
+		wad64_stdio_output output{std::ref(archive), "langmorph_data/word_stats", store_creation_mode};
+		auto output_file = langmorph::create_file(output);
+		store(word_stats, output_file.first.get());
 	}
 
 }

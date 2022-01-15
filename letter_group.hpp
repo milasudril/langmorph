@@ -17,6 +17,11 @@ namespace langmorph
 			return m_chars;
 		}
 
+		char const* c_str() const
+		{
+			return m_chars.c_str();
+		}
+
 		bool operator==(letter_group const&) const = default;
 
 	private:

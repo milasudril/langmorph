@@ -65,7 +65,7 @@ namespace langmorph
 		{
 			return std::pair{file_handle{fopencookie(&handler, "wb", cookie_io_functions_t{
 				nullptr,
-				[](void* cookie, char const* buff, size_t size){
+				[](void* cookie, char const* buff, size_t size) -> ssize_t {
 					return static_cast<IoHandler*>(cookie)->write(std::as_bytes(std::span{buff, size}));
 				},
 				stdio_seek_wrapper<IoHandler>,
