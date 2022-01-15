@@ -9,7 +9,7 @@
 
 #include <random>
 
-int show_help(std::span<std::string_view const>)
+int show_help_general()
 {
 	puts(R"(Usage: langmorph <action> [command arguments]
 
@@ -21,9 +21,49 @@ make-words     generates a list of new words
 	return 0;
 }
 
+int show_help_collect_stats()
+{
+	return 0;
+}
+
+int show_help_make_words()
+{
+	return 0;
+}
+
+int show_help(std::string_view cmd)
+{
+	if(cmd == "collect-stats")
+	{
+		return show_help_collect_stats();
+	}
+
+	if(cmd == "make-words")
+	{
+		return show_help_make_words();
+	}
+	return show_help_general();
+}
+
+int show_help(std::span<std::string_view const> args)
+{
+	if(std::size(args) == 0)
+	{
+		return show_help_general();
+	}
+	return show_help(args[0]);
+}
+
 int collect_stats(std::span<std::string_view const> args)
 {
-	printf("Collect stats %zu\n", std::size(args));
+	if(std::size(args) < 2)
+	{
+		puts(R"(collect-stats requires one letter group file, together with at least one source file to analyze. Try
+
+langmorph help collect-stats
+)");
+		return -1;
+	}
 	return 0;
 }
 
