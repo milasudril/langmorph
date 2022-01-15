@@ -119,6 +119,37 @@ private:
 	Wad64::OutputFile m_output;
 };
 
+class wad64_stdio_input
+{
+public:
+	static constexpr auto is_output = false;
+	static constexpr auto seek_set = Wad64::SeekMode::Set;
+	static constexpr auto seek_cur = Wad64::SeekMode::Cur;
+	static constexpr auto seek_end = Wad64::SeekMode::End;
+
+	template<class First, class ...Args>
+	explicit wad64_stdio_input(First&& first, Args&& ... args)
+		requires (!std::same_as<std::decay_t<First>, wad64_stdio_input>):
+		m_input{Wad64::ArchiveView{std::forward<First>(first)}, std::forward<Args>(args)...}
+	{}
+
+	decltype(auto) read(std::span<std::byte> buffer)
+	{
+		return m_input.read(buffer);
+	}
+
+	decltype(auto) seek(int64_t offset, Wad64::SeekMode mode)
+	{
+		return m_input.seek(offset, mode);
+	}
+
+	static void close() {}
+
+
+private:
+	Wad64::InputFile m_input;
+};
+
 void store(std::string_view statfile,
            langmorph::letter_group_index const& letter_groups,
            langmorph::word_stats const& word_stats)
@@ -163,6 +194,24 @@ void collect_stats(std::string_view statfile,
 	});
 
 	store(statfile, letter_groups, word_stats);
+}
+
+auto load(std::type_identity<langmorph::word_stats>, std::string_view statfile)
+{
+	constexpr auto load_creation_mode = Wad64::FileCreationMode::DontCare();
+	Wad64::FdOwner input_file{std::string{statfile}.c_str(), Wad64::IoMode::AllowRead(), load_creation_mode};
+	Wad64::ReadonlyArchive archive{std::ref(input_file)};
+#if 1
+	{
+		wad64_stdio_input input{std::ref(archive), "langmorph_data/letter_groups"};
+		auto letter_groups = langmorph::load(input, [](auto f) {
+			return langmorph::load(std::type_identity<langmorph::letter_group_index>{}, langmorph::stream_tokenizer{f});
+		});
+//		auto input_file = langmorph::create_file(input);
+//		auto letter_groups = load(std::type_identity<langmorph::letter_group_index>{},
+		//langmorph::stream_tokenizer{input_file.first.get()});
+	}
+#endif
 }
 
 void collect_stats(std::string_view statfile, std::span<std::string_view const> sources)

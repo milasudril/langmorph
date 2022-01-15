@@ -75,12 +75,12 @@ namespace langmorph
 		else
 		{
 			return std::pair{file_handle{fopencookie(&handler, "rb", cookie_io_functions_t{
-				[](void* cookie, char* buff, size_t size){
+				[](void* cookie, char* buff, size_t size) -> ssize_t {
 					return static_cast<IoHandler*>(cookie)->read(std::as_writable_bytes(std::span{buff, size}));
 				},
 				nullptr,
-				stdio_seek_wrapper,
-				stdio_close_wrapper
+				stdio_seek_wrapper<IoHandler>,
+				stdio_close_wrapper<IoHandler>
 			})}, 0};
 		}
 	}
@@ -129,6 +129,19 @@ namespace langmorph
 			.append(":")
 			.append(errmsg)
 		};
+	}
+
+	template<class T>
+	concept input_handler = requires(T a)
+	{
+		{a.read(std::declval<std::span<std::byte>>())} -> std::convertible_to<int64_t>;
+	};
+
+	template<input_handler Handler, class Loader, class... Args>
+	auto load(Handler& handler, Loader&& loader, Args&&... args)
+	{
+		auto res = langmorph::create_file(handler);
+		return loader(res.first.get(), std::forward<Args>(args)...);
 	}
 }
 
