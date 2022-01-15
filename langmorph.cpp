@@ -23,21 +23,22 @@ make-words     generates a list of new words
 
 int show_help_collect_stats()
 {
-	puts(R"(Usage: langmorph collect-stats <output file> <letter group file> <source> [sources...]
+	puts(R"(Usage: langmorph collect-stats <stat file> [letter group file] -- <source> [sources...]
 
-# The output file
+# The stat file
 
-This file will be used for output. If the file already exists, statistics are accumulated. Otherwise
-the file will be created and filled with new statistics.
+This file is used to store statistics. If a letter group file is specified, the file will be
+stat file will be recreated, otherwise statistics will be accumulated.
 
 # The Letter group file
 
-The letter group file is a list of valid letter groups. If the name begins with `.`, the path is
-expected to be relative to the current working directory. Otherwise, the following paths are
-searched
+The letter group file is a list of valid letter groups. If not specified, the letter groups will be
+read from <stat file>. Langmorph uses the following rules to locate the letter group file:
 
-1. $LANGMORPH_HOME
-2. <location of langmorph>/../share/langmorph
+1. If the path is absoulte, that path will be used
+2. If the name begins with `.`, the path is expected to be relative to the current
+3. The directory specified by the LANGMORPH_HOME environment variable
+4. <location of langmorph>/../share/langmorph
 
 On a UNIX system, langmorph would typically be located in /usr/bin
 
