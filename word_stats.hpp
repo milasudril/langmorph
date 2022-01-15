@@ -146,10 +146,6 @@ namespace langmorph
 
 		return std::accumulate(std::begin(stats), std::end(stats), word_stats{std::size(letter_groups)});
 	}
-
-	void store(word_stats const&, FILE*)
-	{
-	}
 }
 
 #endif

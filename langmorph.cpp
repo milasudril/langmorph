@@ -137,11 +137,14 @@ void store(std::string_view statfile,
 	}
 
 	{
-		wad64_stdio_output output{std::ref(archive), "langmorph_data/word_stats", store_creation_mode};
-		auto output_file = langmorph::create_file(output);
-		store(word_stats, output_file.first.get());
+		Wad64::OutputFile output{std::ref(archive), "langmorph_data/word_lengths", store_creation_mode};
+		store(word_stats.length_histogram(), output);
 	}
 
+	{
+		Wad64::OutputFile output{std::ref(archive), "langmorph_data/transition_rates", store_creation_mode};
+		store(word_stats.transition_rates(), output);
+	}
 }
 
 void collect_stats(std::string_view statfile,

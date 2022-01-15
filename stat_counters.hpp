@@ -53,6 +53,11 @@ namespace langmorph
 			return std::span{m_counts.get() + m_size*from.value(), m_size};
 		}
 
+		std::span<size_t const> operator()() const
+		{
+			return std::span{m_counts.get(), m_size*m_size};
+		}
+
 		size_t node_count() const
 		{
 			return m_size;
@@ -82,6 +87,12 @@ namespace langmorph
 		std::unique_ptr<size_t[]> m_counts;
 		size_t m_size;
 	};
+
+	template<class OutputStream>
+	void store(transition_rate_table const& obj, OutputStream&& stream)
+	{
+		stream.write(std::as_bytes(obj()));
+	}
 
 	class histogram_index
 	{
@@ -146,6 +157,11 @@ namespace langmorph
 		std::unique_ptr<size_t[]> m_counts;
 		size_t m_size;
 	};
-}
 
+	template<class OutputStream>
+	void store(histogram const& obj, OutputStream&& stream)
+	{
+		stream.write(std::as_bytes(obj()));
+	}
+}
 #endif
