@@ -89,6 +89,14 @@ void collect_stats(std::string_view statfile,
 	auto letter_groups = load(langmorph::letter_group_file_resolver{letter_groups_file}, [](auto file) {
 		return load(std::type_identity<langmorph::letter_group_index>{}, langmorph::stream_tokenizer{file});
 	});
+
+	langmorph::word_stats word_stats{std::size(letter_groups)};
+	std::ranges::for_each(sources, [&word_stats, &letter_groups](auto file) {
+		word_stats += langmorph::load(file, [&letter_groups](auto file) {
+			return load(std::type_identity<langmorph::word_stats>{}, langmorph::stream_tokenizer{file}, letter_groups);
+		});
+	});
+
 	printf("statfile: %s\n", std::data(statfile));
 	printf("sources:\n");
 	std::ranges::for_each(sources, [](auto item){
