@@ -23,6 +23,32 @@ make-words     generates a list of new words
 
 int show_help_collect_stats()
 {
+	puts(R"(Usage: langmorph collect-stats <output file> <letter group file> <source> [sources...]
+
+# The output file
+
+This file will be used for output. If the file already exists, statistics are accumulated. Otherwise
+the file will be created and filled with new statistics.
+
+# The Letter group file
+
+The letter group file is a list of valid letter groups. If the name begins with `.`, the path is
+expected to be relative to the current working directory. Otherwise, the following paths are
+searched
+
+1. $LANGMORPH_HOME
+2. <location of langmorph>/../share/langmorph
+
+On a UNIX system, langmorph would typically be located in /usr/bin
+
+# Source files
+
+Source files are used to collect statistics. Each word in a source file is tokenized based on the
+largest match in the lettergroup file. If the letter group file contains a, c, e, g, h, l, r, s,
+and sch, the word schlager, will be interpreted as sch-l-a-g-e-r. Statistics are collected for the
+number of tokens in different words, and token succuessors. In this case, there would be one
+incidence of an l that follows sch.
+)");
 	return 0;
 }
 
@@ -76,7 +102,7 @@ int make_words(std::span<std::string_view const>)
 std::vector<std::string_view> get_action_args(int argc, char const* const* argv)
 {
 	std::vector<std::string_view> ret;
-	std::transform(argv + 2, argv + argc, std::back_inserter(ret), [](auto item){
+	std::transform(argv + std::min(argc, 2), argv + argc, std::back_inserter(ret), [](auto item){
 		return std::string_view{item};
 	});
 	return ret;
