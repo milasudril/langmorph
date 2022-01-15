@@ -1,4 +1,4 @@
-//@	{"target":{"name":"langmorph.o"}}
+//@	{"target":{"name":"langmorph.o", "pkgconfig_libs":["wad64"]}}
 
 #include "./io_utils.hpp"
 #include "./letter_group.hpp"
@@ -7,6 +7,12 @@
 #include "./word_stats.hpp"
 #include "./prob_distributions.hpp"
 #include "./letter_group_file_resolver.hpp"
+
+#include <wad64/archive.hpp>
+#include <wad64/readonly_archive.hpp>
+#include <wad64/fd_owner.hpp>
+#include <wad64/output_file.hpp>
+#include <wad64/input_file.hpp>
 
 #include <random>
 
@@ -97,12 +103,20 @@ void collect_stats(std::string_view statfile,
 		});
 	});
 
-	printf("statfile: %s\n", std::data(statfile));
-	printf("sources:\n");
-	std::ranges::for_each(sources, [](auto item){
-		printf("    %s\n", std::data(item));
-	});
-	printf("letter_group_file: %s\n", std::data(letter_groups_file));
+	constexpr auto store_creation_mode = Wad64::FileCreationMode::AllowOverwriteWithTruncation()
+		.allowCreation();
+
+	Wad64::FdOwner output_file{std::string{statfile}.c_str(),
+		Wad64::IoMode::AllowRead().allowWrite(),
+		store_creation_mode};
+	Wad64::Archive archive{std::ref(output_file)};
+	{
+		Wad64::OutputFile output{std::ref(archive), "langmorph_data/letter_groups", store_creation_mode};
+	}
+
+	{
+		Wad64::OutputFile output{std::ref(archive), "langmorph_data/word_stats", store_creation_mode};
+	}
 }
 
 void collect_stats(std::string_view statfile, std::span<std::string_view const> sources)
