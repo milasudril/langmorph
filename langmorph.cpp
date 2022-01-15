@@ -6,6 +6,7 @@
 #include "./letter_group_index.hpp"
 #include "./word_stats.hpp"
 #include "./prob_distributions.hpp"
+#include "./letter_group_file_resolver.hpp"
 
 #include <random>
 
@@ -79,52 +80,6 @@ int show_help(std::span<std::string_view const> args)
 		return show_help_general();
 	}
 	return show_help(args[0]);
-}
-
-namespace langmorph
-{
-	class letter_group_file_resolver
-	{
-	public:
-		explicit letter_group_file_resolver(fs::path&& filename):m_filename{std::move(filename)}
-		{
-		}
-
-		bool fetch_next()
-		{
-			if(m_filename.empty() || m_current_path.empty())
-			{ return false; }
-
-			if(m_filename.is_absolute() || m_filename.string().front() == '.')
-			{
-				m_current_path = m_filename;
-				return true;
-			}
-
-			if(auto langmorph_home = getenv("LANGMORPH_HOME"); langmorph_home != nullptr)
-			{
-				m_current_path = fs::path{langmorph_home} / m_filename;
-				return true;
-			}
-
-			m_current_path = read_symlink(fs::path{"/proc/self/exe"}).parent_path() / "share/langmorph" / m_filename;
-			return true;
-		}
-
-		fs::path const& current() const
-		{
-			return m_current_path;
-		}
-
-	private:
-		fs::path m_filename;
-		fs::path m_current_path;
-	};
-
-	std::string to_string(letter_group_file_resolver const& res)
-	{
-		return std::string{" "}.append(res.current());
-	}
 }
 
 void collect_stats(std::string_view statfile,
