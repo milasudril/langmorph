@@ -86,42 +86,44 @@ namespace langmorph
 	class letter_group_file_resolver
 	{
 	public:
-		explicit letter_group_file_resolver(fs::path&& filename):m_filename{std::move(filename)},m_alt{0}
+		explicit letter_group_file_resolver(fs::path&& filename):m_filename{std::move(filename)}
 		{
 		}
 
 		bool fetch_next()
 		{
-			if(m_alt == 4)
-			{return false;}
+			if(m_filename.empty() || m_current_path.empty())
+			{ return false; }
 
-			++m_alt;
+			if(m_filename.is_absolute() || m_filename.string().front() == '.')
+			{
+				m_current_path = m_filename;
+				return true;
+			}
+
+			if(auto langmorph_home = getenv("LANGMORPH_HOME"); langmorph_home != nullptr)
+			{
+				m_current_path = fs::path{langmorph_home} / m_filename;
+				return true;
+			}
+
+			m_current_path = read_symlink(fs::path{"/proc/self/exe"}).parent_path() / "share/langmorph" / m_filename;
 			return true;
 		}
 
 		fs::path const& current() const
 		{
-			return m_tried_paths.back();
-		}
-
-		std::span<fs::path const> tried_paths() const
-		{
-			return m_tried_paths;
+			return m_current_path;
 		}
 
 	private:
 		fs::path m_filename;
-		std::vector<fs::path> m_tried_paths;
-		size_t m_alt;
+		fs::path m_current_path;
 	};
 
 	std::string to_string(letter_group_file_resolver const& res)
 	{
-		std::string ret;
-		std::ranges::for_each(res.tried_paths(), [&ret](auto const& item){
-			ret.append(" ").append(item);
-		});
-		return ret;
+		return std::string{" "}.append(res.current());
 	}
 }
 
