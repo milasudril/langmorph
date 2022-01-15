@@ -3,9 +3,14 @@
 
 #include <cstdio>
 #include <memory>
+#include <filesystem>
+#include <cerrno>
+#include <cstring>
 
 namespace langmorph
 {
+	namespace fs = std::filesystem;
+
 	struct file_deleter
 	{
 		void operator()(FILE* f)
@@ -18,16 +23,25 @@ namespace langmorph
 	using file_handle = std::unique_ptr<FILE, file_deleter>;
 
 	template<class... Args>
-	file_handle create_file(Args&&... args)
+	auto create_file(char const* filename, Args&&... args)
 	{
-		return file_handle{fopen(std::forward<Args>(args)...)};
+		return std::pair{file_handle{fopen(filename, std::forward<Args>(args)...)}, errno};
 	}
 
 	template<class T, class ... Args>
-	auto load(char const* filename, T&& loader, Args... args)
+	auto load(fs::path&& filename, T&& loader, Args... args)
 	{
-		auto input_file = langmorph::create_file(filename, "rb");
-		return loader(input_file.get(), std::forward<Args>(args)...);
+		auto res = langmorph::create_file(filename.c_str(), "rb");
+		if(res.first == nullptr)
+		{
+			auto errmsg = strerror(res.second);
+			throw std::runtime_error{std::string{"Failed to open "}.append(filename)
+				.append(":")
+				.append(errmsg)
+			};
+		}
+
+		return loader(res.first.get(), std::forward<Args>(args)...);
 	}
 
 }

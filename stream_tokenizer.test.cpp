@@ -8,8 +8,9 @@
 TESTCASE(langmorph_stream_tokenizer_read_data)
 {
 	auto handle = langmorph::create_file("testdata/input_file.txt", "rb");
+	REQUIRE_NE(handle.first.get(), nullptr);
 
-	langmorph::stream_tokenizer tok{handle.get()};
+	langmorph::stream_tokenizer tok{handle.first.get()};
 	EXPECT_EQ(tok.empty(), false);
 	std::vector<std::string> output;
 	while(!tok.empty())

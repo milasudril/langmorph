@@ -85,6 +85,9 @@ void collect_stats(std::string_view statfile,
                    std::span<std::string_view const> sources,
                    std::string_view letter_groups_file)
 {
+	auto letter_groups = langmorph::load(letter_groups_file, [](auto file) {
+		return load(std::type_identity<langmorph::letter_group_index>{}, langmorph::stream_tokenizer{file});
+	});
 	printf("statfile: %s\n", std::data(statfile));
 	printf("sources:\n");
 	std::ranges::for_each(sources, [](auto item){
