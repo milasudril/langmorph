@@ -46,29 +46,29 @@ namespace langmorph
 	}
 
 	template<class T>
-	concept file_list = std::ranges::input_range<T> && requires(T a)
+	concept path_resolver = requires(T a)
 	{
-		{a->c_str()} -> std::same_as<char const*>;
+		{a.current().c_str()} -> std::same_as<char const*>;
+		{a.fetch_next()} -> std::same_as<bool>;
+		{to_string(a)} -> std::convertible_to<std::string>;
 	};
 
-	template<file_list FileList, class Loader, class ... Args>
-	auto load(FileList&& file_list, Loader&& loader, Args&&... args)
+	template<path_resolver Resolver, class Loader, class ... Args>
+	auto load(Resolver&& resolver, Loader&& loader, Args&&... args)
 	{
-		auto i = std::begin(file_list);
 		auto last_error = errno;
-		while(i != std::end(file_list))
+		while(resolver.fetch_next())
 		{
-			auto f = create_file(i->c_str(), "rb");
+			auto f = create_file(resolver.current().c_str(), "rb");
 			if(f.first != nullptr)
 			{
 				return loader(f.first.get(), std::forward<Args>(args)...);
 			}
 			last_error = f.second;
-			++i;
 		}
 
 		auto errmsg = strerror(last_error);
-		throw std::runtime_error{std::string{"Failed to open "}.append(to_string(file_list))
+		throw std::runtime_error{std::string{"Failed to open one of"}.append(to_string(resolver))
 			.append(":")
 			.append(errmsg)
 		};

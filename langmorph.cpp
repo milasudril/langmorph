@@ -81,11 +81,55 @@ int show_help(std::span<std::string_view const> args)
 	return show_help(args[0]);
 }
 
+namespace langmorph
+{
+	class letter_group_file_resolver
+	{
+	public:
+		explicit letter_group_file_resolver(fs::path&& filename):m_filename{std::move(filename)},m_alt{0}
+		{
+		}
+
+		bool fetch_next()
+		{
+			if(m_alt == 4)
+			{return false;}
+
+			++m_alt;
+			return true;
+		}
+
+		fs::path const& current() const
+		{
+			return m_tried_paths.back();
+		}
+
+		std::span<fs::path const> tried_paths() const
+		{
+			return m_tried_paths;
+		}
+
+	private:
+		fs::path m_filename;
+		std::vector<fs::path> m_tried_paths;
+		size_t m_alt;
+	};
+
+	std::string to_string(letter_group_file_resolver const& res)
+	{
+		std::string ret;
+		std::ranges::for_each(res.tried_paths(), [&ret](auto const& item){
+			ret.append(" ").append(item);
+		});
+		return ret;
+	}
+}
+
 void collect_stats(std::string_view statfile,
                    std::span<std::string_view const> sources,
                    std::string_view letter_groups_file)
 {
-	auto letter_groups = langmorph::load(letter_groups_file, [](auto file) {
+	auto letter_groups = load(langmorph::letter_group_file_resolver{letter_groups_file}, [](auto file) {
 		return load(std::type_identity<langmorph::letter_group_index>{}, langmorph::stream_tokenizer{file});
 	});
 	printf("statfile: %s\n", std::data(statfile));
