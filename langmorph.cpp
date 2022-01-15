@@ -83,12 +83,9 @@ int show_help(std::span<std::string_view const> args)
 
 int collect_stats(std::span<std::string_view const> args)
 {
-	if(std::size(args) < 2)
+	if(std::size(args) < 3)
 	{
-		puts(R"(collect-stats requires one letter group file, together with at least one source file to analyze. Try
-
-langmorph help collect-stats
-)");
+		puts(R"(Try langmorph help collect-stats)");
 		return -1;
 	}
 	return 0;
