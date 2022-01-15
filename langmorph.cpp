@@ -201,21 +201,21 @@ auto load(std::type_identity<langmorph::word_stats>, std::string_view statfile)
 	constexpr auto load_creation_mode = Wad64::FileCreationMode::DontCare();
 	Wad64::FdOwner input_file{std::string{statfile}.c_str(), Wad64::IoMode::AllowRead(), load_creation_mode};
 	Wad64::ReadonlyArchive archive{std::ref(input_file)};
-#if 1
-	{
-		wad64_stdio_input input{std::ref(archive), "langmorph_data/letter_groups"};
-		auto letter_groups = langmorph::load(input, [](auto f) {
-			return langmorph::load(std::type_identity<langmorph::letter_group_index>{}, langmorph::stream_tokenizer{f});
+
+	auto letter_groups = langmorph::with(wad64_stdio_input{std::ref(archive), "langmorph_data/letter_groups"},
+		[](auto&& input) {
+			auto input_file = langmorph::create_file(input);
+			return langmorph::load(
+				std::type_identity<langmorph::letter_group_index>{},
+				langmorph::stream_tokenizer{input_file.first.get()});
 		});
-//		auto input_file = langmorph::create_file(input);
-//		auto letter_groups = load(std::type_identity<langmorph::letter_group_index>{},
-		//langmorph::stream_tokenizer{input_file.first.get()});
-	}
-#endif
+
+	printf("%zu\n", std::size(letter_groups));
 }
 
 void collect_stats(std::string_view statfile, std::span<std::string_view const> sources)
 {
+	load(std::type_identity<langmorph::word_stats>{}, statfile);
 	printf("statfile: %s\n", std::data(statfile));
 	printf("sources:\n");
 	std::ranges::for_each(sources, [](auto item){

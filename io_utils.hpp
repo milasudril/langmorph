@@ -86,7 +86,7 @@ namespace langmorph
 	}
 
 	template<class Loader, class ... Args>
-	auto load(fs::path const& filename, Loader&& loader, Args&&... args)
+	decltype(auto) load(fs::path const& filename, Loader&& loader, Args&&... args)
 	{
 		auto res = langmorph::create_file(filename.c_str(), "rb");
 		if(res.first == nullptr)
@@ -110,7 +110,7 @@ namespace langmorph
 	};
 
 	template<path_resolver Resolver, class Loader, class ... Args>
-	auto load(Resolver&& resolver, Loader&& loader, Args&&... args)
+	decltype(auto) load(Resolver&& resolver, Loader&& loader, Args&&... args)
 	{
 		auto last_error = errno;
 		while(resolver.fetch_next())
@@ -138,10 +138,16 @@ namespace langmorph
 	};
 
 	template<input_handler Handler, class Loader, class... Args>
-	auto load(Handler& handler, Loader&& loader, Args&&... args)
+	decltype(auto) load(Handler& handler, Loader&& loader, Args&&... args)
 	{
 		auto res = langmorph::create_file(handler);
 		return loader(res.first.get(), std::forward<Args>(args)...);
+	}
+
+	template<class Obj, class Function, class ... Args>
+	decltype(auto) with(Obj&& obj, Function&& f, Args&&... args)
+	{
+		return f(std::forward<Obj>(obj), std::forward<Args>(args)...);
 	}
 }
 
