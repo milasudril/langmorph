@@ -6,7 +6,7 @@
 #include <filesystem>
 #include <cerrno>
 #include <cstring>
-#include <ranges>
+#include <span>
 
 namespace langmorph
 {
@@ -23,10 +23,66 @@ namespace langmorph
 
 	using file_handle = std::unique_ptr<FILE, file_deleter>;
 
+	template<class IoHandler>
+	int stdio_seek_wrapper(void* cookie, off64_t* offset, int whence)
+	{
+		if(offset == nullptr){ return -1; }
+
+		auto& obj = *static_cast<IoHandler*>(cookie);
+		switch(whence)
+		{
+			case SEEK_SET:
+				*offset = obj.seek(*offset, IoHandler::seek_set);
+				return 0;
+			case SEEK_CUR:
+				*offset = obj.seek(*offset, IoHandler::seek_cur);
+				return 0;
+			case SEEK_END:
+				*offset = obj.seek(*offset, IoHandler::seek_end);
+				return 0;
+			default: return -1;
+		}
+	}
+
+	template<class IoHandler>
+	int stdio_close_wrapper(void* cookie)
+	{
+		static_cast<IoHandler*>(cookie)->close();
+		return 0;
+	}
+
 	template<class... Args>
 	auto create_file(char const* filename, Args&&... args)
 	{
-		return std::pair{file_handle{fopen(filename, std::forward<Args>(args)...)}, errno};
+		auto f = fopen(filename, std::forward<Args>(args)...);
+		return std::pair{file_handle{f}, errno};
+	}
+
+	template<class IoHandler, class... Args>
+	auto create_file(IoHandler& handler)
+	{
+		if constexpr(IoHandler::is_output)
+		{
+			return std::pair{file_handle{fopencookie(&handler, "wb", cookie_io_functions_t{
+				nullptr,
+				[](void* cookie, char const* buff, size_t size){
+					return static_cast<IoHandler*>(cookie)->write(std::as_bytes(std::span{buff, size}));
+				},
+				stdio_seek_wrapper<IoHandler>,
+				stdio_close_wrapper<IoHandler>
+			})}, 0};
+		}
+		else
+		{
+			return std::pair{file_handle{fopencookie(&handler, "rb", cookie_io_functions_t{
+				[](void* cookie, char* buff, size_t size){
+					return static_cast<IoHandler*>(cookie)->read(std::as_writable_bytes(std::span{buff, size}));
+				},
+				nullptr,
+				stdio_seek_wrapper,
+				stdio_close_wrapper
+			})}, 0};
+		}
 	}
 
 	template<class Loader, class ... Args>
