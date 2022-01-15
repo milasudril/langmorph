@@ -146,6 +146,11 @@ namespace langmorph
 
 		return std::accumulate(std::begin(stats), std::end(stats), word_stats{std::size(letter_groups)});
 	}
+
+	template<class OutputStream>
+	void store(word_stats const&, OutputStream&&)
+	{
+	}
 }
 
 #endif

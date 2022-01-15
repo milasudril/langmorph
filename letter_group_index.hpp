@@ -100,11 +100,26 @@ namespace langmorph
 			return std::size(m_id_to_group);
 		}
 
+		auto const& by_id() const
+		{
+			return m_id_to_group;
+		}
+
+		auto const& by_name() const
+		{
+			return m_group_to_id;
+		}
+
 	private:
 		std::map<letter_group_id, letter_group> m_id_to_group;
 		std::map<std::string_view, letter_group_id> m_group_to_id;
 		letter_group_id m_last_id;
 	};
+
+	template<class OutputStream>
+	void store(letter_group_index const&, OutputStream&&)
+	{
+	}
 }
 
 #endif

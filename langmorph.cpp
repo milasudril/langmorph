@@ -88,6 +88,29 @@ int show_help(std::span<std::string_view const> args)
 	return show_help(args[0]);
 }
 
+void store(std::string_view statfile,
+           langmorph::letter_group_index const& letter_groups,
+           langmorph::word_stats const& word_stats)
+{
+	constexpr auto store_creation_mode = Wad64::FileCreationMode::AllowOverwriteWithTruncation()
+		.allowCreation();
+
+	Wad64::FdOwner output_file{std::string{statfile}.c_str(),
+		Wad64::IoMode::AllowRead().allowWrite(),
+		store_creation_mode};
+	Wad64::Archive archive{std::ref(output_file)};
+	{
+		Wad64::OutputFile output{std::ref(archive), "langmorph_data/letter_groups", store_creation_mode};
+		store(letter_groups, output);
+	}
+
+	{
+		Wad64::OutputFile output{std::ref(archive), "langmorph_data/word_stats", store_creation_mode};
+		store(word_stats, output);
+	}
+
+}
+
 void collect_stats(std::string_view statfile,
                    std::span<std::string_view const> sources,
                    std::string_view letter_groups_file)
@@ -103,20 +126,7 @@ void collect_stats(std::string_view statfile,
 		});
 	});
 
-	constexpr auto store_creation_mode = Wad64::FileCreationMode::AllowOverwriteWithTruncation()
-		.allowCreation();
-
-	Wad64::FdOwner output_file{std::string{statfile}.c_str(),
-		Wad64::IoMode::AllowRead().allowWrite(),
-		store_creation_mode};
-	Wad64::Archive archive{std::ref(output_file)};
-	{
-		Wad64::OutputFile output{std::ref(archive), "langmorph_data/letter_groups", store_creation_mode};
-	}
-
-	{
-		Wad64::OutputFile output{std::ref(archive), "langmorph_data/word_stats", store_creation_mode};
-	}
+	store(statfile, letter_groups, word_stats);
 }
 
 void collect_stats(std::string_view statfile, std::span<std::string_view const> sources)
