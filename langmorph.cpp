@@ -9,7 +9,7 @@
 
 #include <random>
 
-void show_help()
+int show_help(std::span<std::string_view const>)
 {
 	puts(R"(Usage: langmorph <action> [command arguments]
 
@@ -18,15 +18,61 @@ Supported actions:
 collect-stats  collects statistics given a file with words and a file with valid letter groups
 make-words     generates a list of new words
 )");
+	return 0;
+}
+
+int collect_stats(std::span<std::string_view const> args)
+{
+	printf("Collect stats %zu\n", std::size(args));
+	return 0;
+}
+
+int make_words(std::span<std::string_view const>)
+{
+	puts("Make words");
+	return 0;
+}
+
+std::vector<std::string_view> get_action_args(int argc, char const* const* argv)
+{
+	std::vector<std::string_view> ret;
+	std::transform(argv + 2, argv + argc, std::back_inserter(ret), [](auto item){
+		return std::string_view{item};
+	});
+	return ret;
+}
+
+std::string_view get_action(int argc, char const* const* argv)
+{
+	if(argc < 2)
+	{
+		return std::string_view{"help"};
+	}
+
+	return std::string_view{argv[1]};
 }
 
 int main(int argc, char** argv)
 {
-	if(argc < 2)
+	auto action = get_action(argc, argv);
+	auto action_args = get_action_args(argc, argv);
+	if(action == "help")
 	{
-		show_help();
-		return 0;
+		return show_help(action_args);
 	}
+
+	if(action == "collect-stats")
+	{
+		return collect_stats(action_args);
+	}
+
+	if(action == "make-words")
+	{
+		return make_words(action_args);
+	}
+
+	return show_help(action_args);
+#if 0
 
 	auto letter_groups = langmorph::load(argv[1], [](auto file) {
 		return load(std::type_identity<langmorph::letter_group_index>{}, langmorph::stream_tokenizer{file});
@@ -56,4 +102,5 @@ int main(int argc, char** argv)
 	}
 
 	return 0;
+#endif
 }
