@@ -185,6 +185,7 @@ std::string_view get_action(int argc, char const* const* argv)
 }
 
 int main(int argc, char** argv)
+try
 {
 	auto action = get_action(argc, argv);
 	auto action_args = get_action_args(argc, argv);
@@ -235,4 +236,9 @@ int main(int argc, char** argv)
 
 	return 0;
 #endif
+}
+catch(std::exception const& e)
+{
+	fprintf(stderr, "%s\n", e.what());
+	return -1;
 }

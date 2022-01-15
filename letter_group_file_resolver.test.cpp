@@ -53,6 +53,11 @@ TESTCASE(langmorph_letter_group_file_resolver_env)
 	}
 
 	{
+		auto const res = resolver.fetch_next();
+		EXPECT_EQ(res, false);
+	}
+
+	{
 		auto const str = to_string(resolver);
 		EXPECT_EQ(str, " kaka/foobar");
 	}

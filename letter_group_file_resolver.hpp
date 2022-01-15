@@ -23,18 +23,21 @@ namespace langmorph
 			if(m_filename.is_absolute() || m_filename.string().front() == '.')
 			{
 				m_current_path = std::move(m_filename);
+				m_filename.clear();
 				return true;
 			}
 
 			if(auto langmorph_home = getenv("LANGMORPH_HOME"); langmorph_home != nullptr)
 			{
 				m_current_path = fs::path{langmorph_home} / std::move(m_filename);
+				m_filename.clear();
 				return true;
 			}
 
 			m_current_path = read_symlink(fs::path{"/proc/self/exe"}).parent_path()
 			               / "share" / "langmorph"
 			               / std::move(m_filename);
+			m_filename.clear();
 			return true;
 		}
 
