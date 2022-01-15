@@ -81,6 +81,27 @@ int show_help(std::span<std::string_view const> args)
 	return show_help(args[0]);
 }
 
+void collect_stats(std::string_view statfile,
+                   std::span<std::string_view const> sources,
+                   std::string_view letter_groups_file)
+{
+	printf("statfile: %s\n", std::data(statfile));
+	printf("sources:\n");
+	std::ranges::for_each(sources, [](auto item){
+		printf("    %s\n", std::data(item));
+	});
+	printf("letter_group_file: %s\n", std::data(letter_groups_file));
+}
+
+void collect_stats(std::string_view statfile, std::span<std::string_view const> sources)
+{
+	printf("statfile: %s\n", std::data(statfile));
+	printf("sources:\n");
+	std::ranges::for_each(sources, [](auto item){
+		printf("    %s\n", std::data(item));
+	});
+}
+
 int collect_stats(std::span<std::string_view const> args)
 {
 	if(std::size(args) < 3)
@@ -88,6 +109,27 @@ int collect_stats(std::span<std::string_view const> args)
 		puts(R"(Try langmorph help collect-stats)");
 		return -1;
 	}
+
+	auto const has_letter_group_file = args[1] != "--";
+	if(has_letter_group_file && std::size(args) < 4)
+	{
+		puts(R"(Try langmorph help collect-stats)");
+		return -1;
+	}
+
+	auto const statfile = args[0];
+	auto const letter_group_file = has_letter_group_file ? args[1] : std::string_view{};
+	auto const sources = std::span{std::begin(args) + (has_letter_group_file? 3 : 2), std::end(args)};
+
+	if(has_letter_group_file)
+	{
+		collect_stats(statfile, sources, letter_group_file);
+	}
+	else
+	{
+		collect_stats(statfile, sources);
+	}
+
 	return 0;
 }
 
