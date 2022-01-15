@@ -9,12 +9,23 @@
 
 #include <random>
 
+void show_help()
+{
+	puts(R"(Usage: langmorph <action> [command arguments]
+
+Supported actions:
+
+collect-stats  collects statistics given a file with words and a file with valid letter groups
+make-words     generates a list of new words
+)");
+}
+
 int main(int argc, char** argv)
 {
-	if(argc < 3)
+	if(argc < 2)
 	{
-		puts("Too few arguments");
-		return -1;
+		show_help();
+		return 0;
 	}
 
 	auto letter_groups = langmorph::load(argv[1], [](auto file) {
