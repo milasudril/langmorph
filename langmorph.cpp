@@ -62,6 +62,13 @@ incidence of an l that follows sch.
 
 int show_help_make_words()
 {
+	puts(R"(Usage: langmorph make-words <stat file> <num words>
+
+# The stat file
+
+The stat file is expected to contain statistics on word lenght and letter group transtition rates.
+use `langmorph collect-stats` to generate this file
+)");
 	return 0;
 }
 
@@ -274,9 +281,35 @@ int collect_stats(std::span<std::string_view const> args)
 	return 0;
 }
 
-int make_words(std::span<std::string_view const>)
+int make_words(std::span<std::string_view const> args)
 {
-	puts("Make words");
+	if(std::size(args) < 2)
+	{
+		puts(R"(Try langmorph help make-words)");
+	}
+
+	auto const savestate = load(std::type_identity<savetate>{}, args[0]);
+	auto const num_words = static_cast<size_t>(std::stoll(std::string{args[1]}));
+
+	auto word_length = langmorph::gen_pmf(savestate.word_stats.length_histogram()());
+	langmorph::bivar_discrete_distribution letter_group_probs{savestate.word_stats.transition_rates()};
+
+	std::mt19937 rng;
+
+	for(size_t k = 0; k != num_words; ++k)
+	{
+		auto length = word_length(rng);
+		auto current_group = letter_group_probs.col(0, rng);
+		std::string word{savestate.letter_groups.get(langmorph::letter_group_id{current_group}).value()};
+		assert(length != 0);
+		for(size_t l = 1; l != length; ++l)
+		{
+			current_group = letter_group_probs.col(current_group, rng);
+			word += savestate.letter_groups.get(langmorph::letter_group_id{current_group}).value();
+		}
+		puts(word.c_str());
+	}
+
 	return 0;
 }
 
@@ -320,37 +353,6 @@ try
 	}
 
 	return show_help(action_args);
-#if 0
-
-	auto letter_groups = langmorph::load(argv[1], [](auto file) {
-		return load(std::type_identity<langmorph::letter_group_index>{}, langmorph::stream_tokenizer{file});
-	});
-
-	auto word_stats = langmorph::load(argv[2], [&letter_groups](auto file) {
-		return load(std::type_identity<langmorph::word_stats>{}, langmorph::stream_tokenizer{file}, letter_groups);
-	});
-
-	auto word_length = langmorph::gen_pmf(word_stats.length_histogram()());
-	langmorph::bivar_discrete_distribution letter_group_probs{word_stats.transition_rates()};
-
-	std::mt19937 rng;
-
-	for(size_t k = 0; k != 1024; ++k)
-	{
-		auto length = word_length(rng);
-		auto current_group = letter_group_probs.col(0, rng);
-		std::string word{letter_groups.get(langmorph::letter_group_id{current_group}).value()};
-		assert(length != 0);
-		for(size_t l = 1; l != length; ++l)
-		{
-			current_group = letter_group_probs.col(current_group, rng);
-			word += letter_groups.get(langmorph::letter_group_id{current_group}).value();
-		}
-		puts(word.c_str());
-	}
-
-	return 0;
-#endif
 }
 catch(std::exception const& e)
 {
