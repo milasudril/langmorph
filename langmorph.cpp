@@ -205,10 +205,15 @@ auto load(std::type_identity<langmorph::word_stats>, std::string_view statfile)
 	auto letter_groups = langmorph::with(wad64_stdio_input{std::ref(archive), "langmorph_data/letter_groups"},
 		[](auto&& input) {
 			auto input_file = langmorph::create_file(input);
-			return langmorph::load(
-				std::type_identity<langmorph::letter_group_index>{},
+			return load(std::type_identity<langmorph::letter_group_index>{},
 				langmorph::stream_tokenizer{input_file.first.get()});
 		});
+
+	auto word_lengths = load(std::type_identity<langmorph::histogram>{},
+		Wad64::InputFile{Wad64::ArchiveView{archive}, "langmorph_data/word_lengths"});
+
+//	auto transition_rates = load(std::type_identity<langmorph::transition_rate_table>{},
+//		Wad64::InputFile{Wad64::ArchiveView{archive}, "langmorph_data/transition_rates"});
 
 	printf("%zu\n", std::size(letter_groups));
 }
