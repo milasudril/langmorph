@@ -1,5 +1,5 @@
 some text   with umläut
 https://www.youtube.com/watch?v=P0hSCKhySHc&list=PLoppF9lDpcn13_3bhfkYJVuCjNW_N2HEe
-A single . should be ignored
+A single . should not be ignored
 Multiple ...  should be ignored
 This is a sentance. More words

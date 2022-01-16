@@ -53,7 +53,7 @@ void langmorph::stream_tokenizer::pop()
 
 		if(static_cast<char>(ch_in) >= '\0' && ch_in <= static_cast<char>(' '))
 		{
-			if(last_delim != std::string::npos)
+			if(last_delim != std::string::npos && std::size(m_buffer) != 1)
 			{ m_buffer.resize(last_delim); }
 
 			if(std::size(m_buffer) == 0)

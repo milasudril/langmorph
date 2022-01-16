@@ -120,7 +120,6 @@ namespace langmorph
 			{
 				return loader(f.first.get(), std::forward<Args>(args)...);
 			}
-			printf("%s\n", resolver.current().c_str());
 			last_error = f.second;
 		}
 

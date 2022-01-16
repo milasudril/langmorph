@@ -27,7 +27,6 @@ namespace langmorph
 				++wordcount;
 				process(word, letter_groups);
 			}
-			fprintf(stderr, "%zu\n", wordcount);
 		}
 
 		explicit word_stats(langmorph::histogram&& hist, transition_rate_table&& transition_rates):
@@ -139,8 +138,6 @@ namespace langmorph
 			{
 				fifos[thread_index % std::size(fifos)].push(std::move(buffer));
 			}
-
-			fprintf(stderr, "\n Completed %zu\n", wordcount);
 
 			for(size_t k = 0; k != std::size(fifos); ++k)
 			{
