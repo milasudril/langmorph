@@ -212,10 +212,13 @@ auto load(std::type_identity<langmorph::word_stats>, std::string_view statfile)
 	auto word_lengths = load(std::type_identity<langmorph::histogram>{},
 		Wad64::InputFile{Wad64::ArchiveView{archive}, "langmorph_data/word_lengths"});
 
-//	auto transition_rates = load(std::type_identity<langmorph::transition_rate_table>{},
-//		Wad64::InputFile{Wad64::ArchiveView{archive}, "langmorph_data/transition_rates"});
+	auto transition_rates = load(std::type_identity<langmorph::transition_rate_table>{},
+		Wad64::InputFile{Wad64::ArchiveView{archive}, "langmorph_data/transition_rates"});
 
-	printf("%zu\n", std::size(letter_groups));
+	if(std::size(letter_groups) != transition_rates.node_count())
+	{
+		throw std::runtime_error{"Tried to load an invalid stat file"};
+	}
 }
 
 void collect_stats(std::string_view statfile, std::span<std::string_view const> sources)

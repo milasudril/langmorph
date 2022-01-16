@@ -1,6 +1,8 @@
 #ifndef LANGMORPH_STATCOUNTERS_HPP
 #define LANGMORPH_STATCOUNTERS_HPP
 
+#include "./isqrt.hpp"
+
 #include <memory>
 #include <span>
 #include <algorithm>
@@ -37,6 +39,29 @@ namespace langmorph
 
 		explicit transition_rate_table(size_t size):m_counts{std::make_unique<size_t[]>(size*size)}, m_size{size}
 		{}
+
+		template<class InputStream>
+		explicit transition_rate_table(InputStream&& stream) requires (!std::same_as<std::decay_t<InputStream>, transition_rate_table> && !std::integral<InputStream>)
+		{
+			auto const size = std::size(stream);
+			if(size % sizeof(size_t) != 0)
+			{
+				throw std::runtime_error{"Tried to load an invalid transition rate table"};
+			}
+
+			auto const num_entries = size/sizeof(size_t);
+			auto buffer = std::make_unique<size_t[]>(num_entries);
+
+			auto const node_count = isqrt(num_entries);
+			if(node_count*node_count != num_entries)
+			{
+				throw std::runtime_error{"Tried to load an invalid transition rate table"};
+			}
+
+			stream.read(std::as_writable_bytes(std::span{buffer.get(), static_cast<size_t>(size)}));
+			m_counts = std::move(buffer);
+			m_size = node_count;
+		}
 
 		size_t operator()(from_id from, to_id to) const
 		{
@@ -95,8 +120,9 @@ namespace langmorph
 	}
 
 	template<class InputStream>
-	void load(std::type_identity<transition_rate_table>, InputStream&&)
+	auto load(std::type_identity<transition_rate_table>, InputStream&& stream)
 	{
+		return transition_rate_table{std::forward<InputStream>(stream)};
 	}
 
 	class histogram_index
@@ -120,6 +146,22 @@ namespace langmorph
 	public:
 		histogram(): m_size{0}
 		{}
+
+		template<class InputStream>
+		explicit histogram(InputStream&& stream) requires (!std::same_as<std::decay_t<InputStream>, histogram>)
+		{
+			auto const size = std::size(stream);
+			if(size % sizeof(size_t) != 0)
+			{
+				throw std::runtime_error{"Tried to load an invalid histogram"};
+			}
+
+			auto const num_entries = size/sizeof(size_t);
+			auto buffer = std::make_unique<size_t[]>(num_entries);
+			stream.read(std::as_writable_bytes(std::span{buffer.get(), static_cast<size_t>(size)}));
+			m_counts = std::move(buffer);
+			m_size = num_entries;
+		}
 
 		size_t operator()(histogram_index index) const
 		{
@@ -158,22 +200,6 @@ namespace langmorph
 			return *this;
 		}
 
-		template<class InputStream>
-		explicit histogram(InputStream&& stream) requires (!std::same_as<std::decay_t<InputStream>, histogram>)
-		{
-			auto const size = std::size(stream);
-			if(size % sizeof(size_t) != 0)
-			{
-				throw std::runtime_error{"Tried to load an invalid histogram"};
-			}
-
-			auto const num_entries = size/sizeof(size_t);
-			auto buffer = std::make_unique<size_t[]>(num_entries);
-			stream.read(std::as_writable_bytes(std::span{buffer.get(), static_cast<size_t>(size)}));
-			m_counts = std::move(buffer);
-			m_size = num_entries;
-		}
-
 	private:
 		std::unique_ptr<size_t[]> m_counts;
 		size_t m_size;
@@ -189,7 +215,6 @@ namespace langmorph
 	auto load(std::type_identity<histogram>, InputStream&& stream)
 	{
 		return histogram{std::forward<InputStream>(stream)};
-
 	}
 }
 #endif
