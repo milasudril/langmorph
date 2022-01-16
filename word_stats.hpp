@@ -30,6 +30,10 @@ namespace langmorph
 			fprintf(stderr, "%zu\n", wordcount);
 		}
 
+		explicit word_stats(langmorph::histogram&& hist, transition_rate_table&& transition_rates):
+			m_length_hist{std::move(hist)}, m_transition_rates{std::move(transition_rates)}
+		{}
+
 		explicit word_stats(size_t transition_rates_size):m_transition_rates{transition_rates_size}{}
 
 		auto const& length_histogram() const

@@ -178,6 +178,18 @@ void store(std::string_view statfile,
 	}
 }
 
+auto collect_stats(langmorph::letter_group_index const& letter_groups, std::span<std::string_view const> sources)
+{
+	langmorph::word_stats word_stats{std::size(letter_groups)};
+	std::ranges::for_each(sources, [&word_stats, &letter_groups](auto file) {
+		word_stats += langmorph::load(file, [&letter_groups](auto file) {
+			return load(std::type_identity<langmorph::word_stats>{}, langmorph::stream_tokenizer{file}, letter_groups);
+		});
+	});
+
+	return word_stats;
+}
+
 void collect_stats(std::string_view statfile,
                    std::span<std::string_view const> sources,
                    std::string_view letter_groups_file)
@@ -186,17 +198,18 @@ void collect_stats(std::string_view statfile,
 		return load(std::type_identity<langmorph::letter_group_index>{}, langmorph::stream_tokenizer{file});
 	});
 
-	langmorph::word_stats word_stats{std::size(letter_groups)};
-	std::ranges::for_each(sources, [&word_stats, &letter_groups](auto file) {
-		word_stats += langmorph::load(file, [&letter_groups](auto file) {
-			return load(std::type_identity<langmorph::word_stats>{}, langmorph::stream_tokenizer{file}, letter_groups);
-		});
-	});
+	auto word_stats = collect_stats(letter_groups, sources);
 
 	store(statfile, letter_groups, word_stats);
 }
 
-auto load(std::type_identity<langmorph::word_stats>, std::string_view statfile)
+struct savetate
+{
+	langmorph::letter_group_index letter_groups;
+	langmorph::word_stats word_stats;
+};
+
+auto load(std::type_identity<savetate>, std::string_view statfile)
 {
 	constexpr auto load_creation_mode = Wad64::FileCreationMode::DontCare();
 	Wad64::FdOwner input_file{std::string{statfile}.c_str(), Wad64::IoMode::AllowRead(), load_creation_mode};
@@ -219,16 +232,15 @@ auto load(std::type_identity<langmorph::word_stats>, std::string_view statfile)
 	{
 		throw std::runtime_error{"Tried to load an invalid stat file"};
 	}
+
+	return savetate{std::move(letter_groups), langmorph::word_stats{std::move(word_lengths), std::move(transition_rates)}};
 }
 
 void collect_stats(std::string_view statfile, std::span<std::string_view const> sources)
 {
-	load(std::type_identity<langmorph::word_stats>{}, statfile);
-	printf("statfile: %s\n", std::data(statfile));
-	printf("sources:\n");
-	std::ranges::for_each(sources, [](auto item){
-		printf("    %s\n", std::data(item));
-	});
+	auto savestate = load(std::type_identity<savetate>{}, statfile);
+	savestate.word_stats += collect_stats(savestate.letter_groups, sources);
+	store(statfile, savestate.letter_groups, savestate.word_stats);
 }
 
 int collect_stats(std::span<std::string_view const> args)
