@@ -210,13 +210,13 @@ void collect_stats(std::string_view statfile,
 	store(statfile, letter_groups, word_stats);
 }
 
-struct savetate
+struct savestate
 {
 	langmorph::letter_group_index letter_groups;
 	langmorph::word_stats word_stats;
 };
 
-auto load(std::type_identity<savetate>, std::string_view statfile)
+auto load(std::type_identity<savestate>, std::string_view statfile)
 {
 	constexpr auto load_creation_mode = Wad64::FileCreationMode::DontCare();
 	Wad64::FdOwner input_file{std::string{statfile}.c_str(), Wad64::IoMode::AllowRead(), load_creation_mode};
@@ -240,12 +240,12 @@ auto load(std::type_identity<savetate>, std::string_view statfile)
 		throw std::runtime_error{"Tried to load an invalid stat file"};
 	}
 
-	return savetate{std::move(letter_groups), langmorph::word_stats{std::move(word_lengths), std::move(transition_rates)}};
+	return savestate{std::move(letter_groups), langmorph::word_stats{std::move(word_lengths), std::move(transition_rates)}};
 }
 
 void collect_stats(std::string_view statfile, std::span<std::string_view const> sources)
 {
-	auto savestate = load(std::type_identity<savetate>{}, statfile);
+	auto savestate = load(std::type_identity<struct savestate>{}, statfile);
 	savestate.word_stats += collect_stats(savestate.letter_groups, sources);
 	store(statfile, savestate.letter_groups, savestate.word_stats);
 }
@@ -288,7 +288,7 @@ int make_words(std::span<std::string_view const> args)
 		puts(R"(Try langmorph help make-words)");
 	}
 
-	auto const savestate = load(std::type_identity<savetate>{}, args[0]);
+	auto const savestate = load(std::type_identity<struct savestate>{}, args[0]);
 	auto const num_words = static_cast<size_t>(std::stoll(std::string{args[1]}));
 
 	auto word_length = langmorph::gen_pmf(savestate.word_stats.length_histogram()());
