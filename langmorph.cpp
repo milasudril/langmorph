@@ -296,18 +296,31 @@ int make_words(std::span<std::string_view const> args)
 
 	std::mt19937 rng;
 
-	for(size_t k = 0; k != num_words; ++k)
+	for(size_t k = 0; k != num_words;)
 	{
-		auto length = word_length(rng);
-		auto current_group = letter_group_probs.col(0, rng);
-		std::string word{savestate.letter_groups.get(langmorph::letter_group_id{current_group}).value()};
-		assert(length != 0);
-		for(size_t l = 1; l != length; ++l)
+		auto const length = word_length(rng);
+		while(true)
 		{
-			current_group = letter_group_probs.col(current_group, rng);
-			word += savestate.letter_groups.get(langmorph::letter_group_id{current_group}).value();
+			size_t actual_length = 0;
+			auto current_group = letter_group_probs.col(0, rng);
+			std::string word{savestate.letter_groups.get(langmorph::letter_group_id{current_group}).value()};
+			while(true)
+			{
+				current_group = letter_group_probs.col(current_group, rng);
+				if(current_group == 0)
+				{
+					break;
+				}
+				++actual_length;
+				word += savestate.letter_groups.get(langmorph::letter_group_id{current_group}).value();
+			}
+			if(actual_length == length)
+			{
+				puts(word.c_str());
+				++k;
+				break;
+			}
 		}
-		puts(word.c_str());
 	}
 
 	return 0;

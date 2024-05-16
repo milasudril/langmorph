@@ -93,7 +93,7 @@ TESTCASE(langmorph_wordstats_load)
 		EXPECT_EQ(trans_rates(langmorph::from_id{5},langmorph::to_id{9}), 0);
 		EXPECT_EQ(trans_rates(langmorph::from_id{5},langmorph::to_id{10}), 1);
 
-		EXPECT_EQ(trans_rates(langmorph::from_id{10},langmorph::to_id{0}), 0);
+		EXPECT_EQ(trans_rates(langmorph::from_id{10},langmorph::to_id{0}), 1);
 		EXPECT_EQ(trans_rates(langmorph::from_id{10},langmorph::to_id{1}), 0);
 		EXPECT_EQ(trans_rates(langmorph::from_id{10},langmorph::to_id{2}), 0);
 		EXPECT_EQ(trans_rates(langmorph::from_id{10},langmorph::to_id{3}), 0);

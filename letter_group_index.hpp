@@ -58,7 +58,6 @@ namespace langmorph
 
 			auto ip = m_id_to_group.insert(std::pair{m_last_id, std::move(group)});
 			m_group_to_id.insert(std::pair{ip.first->second.value(), m_last_id});
-
 			++m_last_id;
 		}
 

@@ -57,14 +57,15 @@ namespace langmorph
 			{ return; }
 
 			++m_length_hist(langmorph::histogram_index{std::size(word_split)});
-			std::ranges::for_each(word_split,
-								[from = letter_groups.get(" "),
-								&letter_groups,
-								&tr = m_transition_rates](auto letter_group) mutable {
+			auto const separator = letter_groups.get(" ");
+			auto from = separator;
+			for(auto const& letter_group : word_split)
+			{
 				auto to = letter_groups.get(letter_group);
-				++tr(langmorph::from_id{from.value()}, langmorph::to_id{to.value()});
+				++m_transition_rates(langmorph::from_id{from.value()}, langmorph::to_id{to.value()});
 				from = to;
-			});
+			}
+			++m_transition_rates(langmorph::from_id{from.value()}, langmorph::to_id{separator.value()});
 		}
 
 		void process(std::span<std::string const> word, letter_group_index const& letter_groups)
@@ -86,7 +87,7 @@ namespace langmorph
 	}
 
 
-	constexpr size_t num_workers = 15;
+	constexpr size_t num_workers = 1;
 
 	std::vector<word_stats> create_word_stats(size_t size)
 	{
