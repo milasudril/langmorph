@@ -157,6 +157,12 @@ private:
 	Wad64::InputFile m_input;
 };
 
+struct savestate
+{
+	langmorph::letter_group_index letter_groups;
+	langmorph::word_stats word_stats;
+};
+
 void store(std::string_view statfile,
            langmorph::letter_group_index const& letter_groups,
            langmorph::word_stats const& word_stats)
@@ -209,12 +215,6 @@ void collect_stats(std::string_view statfile,
 
 	store(statfile, letter_groups, word_stats);
 }
-
-struct savestate
-{
-	langmorph::letter_group_index letter_groups;
-	langmorph::word_stats word_stats;
-};
 
 auto load(std::type_identity<savestate>, std::string_view statfile)
 {
