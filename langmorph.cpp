@@ -95,7 +95,7 @@ int show_help(std::span<std::string_view const> args)
 	return show_help(args[0]);
 }
 
-class wad64_stdio_output
+class wad64_output_adapter
 {
 public:
 	static constexpr auto is_output = true;
@@ -104,8 +104,8 @@ public:
 	static constexpr auto seek_end = Wad64::SeekMode::End;
 
 	template<class First, class ...Args>
-	explicit wad64_stdio_output(First&& first, Args&& ... args)
-		requires (!std::same_as<std::decay_t<First>, wad64_stdio_output>):
+	explicit wad64_output_adapter(First&& first, Args&& ... args)
+		requires (!std::same_as<std::decay_t<First>, wad64_output_adapter>):
 		m_output{std::forward<First>(first), std::forward<Args>(args)...}
 	{}
 
@@ -126,7 +126,7 @@ private:
 	Wad64::OutputFile m_output;
 };
 
-class wad64_stdio_input
+class wad64_input_adapter
 {
 public:
 	static constexpr auto is_output = false;
@@ -135,8 +135,8 @@ public:
 	static constexpr auto seek_end = Wad64::SeekMode::End;
 
 	template<class First, class ...Args>
-	explicit wad64_stdio_input(First&& first, Args&& ... args)
-		requires (!std::same_as<std::decay_t<First>, wad64_stdio_input>):
+	explicit wad64_input_adapter(First&& first, Args&& ... args)
+		requires (!std::same_as<std::decay_t<First>, wad64_input_adapter>):
 		m_input{Wad64::ArchiveView{std::forward<First>(first)}, std::forward<Args>(args)...}
 	{}
 
@@ -169,7 +169,7 @@ void store(std::string_view statfile,
 		store_creation_mode};
 	Wad64::Archive archive{std::ref(output_file)};
 	{
-		wad64_stdio_output output{std::ref(archive), "langmorph_data/letter_groups", store_creation_mode};
+		wad64_output_adapter output{std::ref(archive), "langmorph_data/letter_groups", store_creation_mode};
 		auto output_file = langmorph::create_file(output);
 		store(letter_groups, output_file.first.get());
 	}
@@ -222,7 +222,7 @@ auto load(std::type_identity<savestate>, std::string_view statfile)
 	Wad64::FdOwner input_file{std::string{statfile}.c_str(), Wad64::IoMode::AllowRead(), load_creation_mode};
 	Wad64::ReadonlyArchive archive{std::ref(input_file)};
 
-	auto letter_groups = langmorph::with(wad64_stdio_input{std::ref(archive), "langmorph_data/letter_groups"},
+	auto letter_groups = langmorph::with(wad64_input_adapter{std::ref(archive), "langmorph_data/letter_groups"},
 		[](auto&& input) {
 			auto input_file = langmorph::create_file(input);
 			return load(std::type_identity<langmorph::letter_group_index>{},
