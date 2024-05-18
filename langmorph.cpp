@@ -164,8 +164,7 @@ struct savestate
 };
 
 void store(std::string_view statfile,
-           langmorph::letter_group_index const& letter_groups,
-           langmorph::word_stats const& word_stats)
+	savestate const& state)
 {
 	constexpr auto store_creation_mode = Wad64::FileCreationMode::AllowOverwriteWithTruncation()
 		.allowCreation();
@@ -177,17 +176,17 @@ void store(std::string_view statfile,
 	{
 		wad64_output_adapter output{std::ref(archive), "langmorph_data/letter_groups", store_creation_mode};
 		auto output_file = langmorph::create_file(output);
-		store(letter_groups, output_file.first.get());
+		store(state.letter_groups, output_file.first.get());
 	}
 
 	{
 		Wad64::OutputFile output{std::ref(archive), "langmorph_data/word_lengths", store_creation_mode};
-		store(word_stats.length_histogram(), output);
+		store(state.word_stats.length_histogram(), output);
 	}
 
 	{
 		Wad64::OutputFile output{std::ref(archive), "langmorph_data/transition_rates", store_creation_mode};
-		store(word_stats.transition_rates(), output);
+		store(state.word_stats.transition_rates(), output);
 	}
 }
 
@@ -210,10 +209,15 @@ void collect_stats(std::string_view statfile,
 	auto letter_groups = load(langmorph::letter_group_file_resolver{letter_groups_file}, [](auto file) {
 		return load(std::type_identity<langmorph::letter_group_index>{}, langmorph::stream_tokenizer{file});
 	});
-
 	auto word_stats = collect_stats(letter_groups, sources);
 
-	store(statfile, letter_groups, word_stats);
+	store(
+		statfile,
+		savestate{
+			.letter_groups = std::move(letter_groups),
+			.word_stats = std::move(word_stats)
+		}
+	);
 }
 
 auto load(std::type_identity<savestate>, std::string_view statfile)
@@ -247,7 +251,7 @@ void collect_stats(std::string_view statfile, std::span<std::string_view const> 
 {
 	auto savestate = load(std::type_identity<struct savestate>{}, statfile);
 	savestate.word_stats += collect_stats(savestate.letter_groups, sources);
-	store(statfile, savestate.letter_groups, savestate.word_stats);
+	store(statfile, savestate);
 }
 
 int collect_stats(std::span<std::string_view const> args)
