@@ -281,6 +281,34 @@ int collect_stats(std::span<std::string_view const> args)
 	return 0;
 }
 
+std::string make_word(
+	std::mt19937& rng,
+	std::discrete_distribution<size_t>& word_length,
+	langmorph::bivar_discrete_distribution& letter_group_probs,
+	langmorph::letter_group_index const& letter_groups
+)
+{
+	auto const length = word_length(rng);
+	while(true)
+	{
+		size_t actual_length = 0;
+		auto current_group = letter_group_probs.col(0, rng);
+		std::string word{letter_groups.get(langmorph::letter_group_id{current_group}).value()};
+		while(true)
+		{
+			current_group = letter_group_probs.col(current_group, rng);
+			if(current_group == 0)
+			{
+				break;
+			}
+			++actual_length;
+			word += letter_groups.get(langmorph::letter_group_id{current_group}).value();
+		}
+		if(actual_length == length)
+		{	return word; }
+	}
+}
+
 int make_words(std::span<std::string_view const> args)
 {
 	if(std::size(args) < 2)
@@ -296,31 +324,9 @@ int make_words(std::span<std::string_view const> args)
 
 	std::mt19937 rng;
 
-	for(size_t k = 0; k != num_words;)
+	for(size_t k = 0; k != num_words; ++k)
 	{
-		auto const length = word_length(rng);
-		while(true)
-		{
-			size_t actual_length = 0;
-			auto current_group = letter_group_probs.col(0, rng);
-			std::string word{savestate.letter_groups.get(langmorph::letter_group_id{current_group}).value()};
-			while(true)
-			{
-				current_group = letter_group_probs.col(current_group, rng);
-				if(current_group == 0)
-				{
-					break;
-				}
-				++actual_length;
-				word += savestate.letter_groups.get(langmorph::letter_group_id{current_group}).value();
-			}
-			if(actual_length == length)
-			{
-				puts(word.c_str());
-				++k;
-				break;
-			}
-		}
+		puts(make_word(rng, word_length, letter_group_probs, savestate.letter_groups).c_str());
 	}
 
 	return 0;
