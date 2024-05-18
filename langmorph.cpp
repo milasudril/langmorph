@@ -163,8 +163,7 @@ struct savestate
 	langmorph::word_stats word_stats;
 };
 
-void store(std::string_view statfile,
-	savestate const& state)
+void store(std::string_view statfile, savestate const& state)
 {
 	constexpr auto store_creation_mode = Wad64::FileCreationMode::AllowOverwriteWithTruncation()
 		.allowCreation();
@@ -188,36 +187,6 @@ void store(std::string_view statfile,
 		Wad64::OutputFile output{std::ref(archive), "langmorph_data/transition_rates", store_creation_mode};
 		store(state.word_stats.transition_rates(), output);
 	}
-}
-
-auto collect_stats(langmorph::letter_group_index const& letter_groups, std::span<std::string_view const> sources)
-{
-	langmorph::word_stats word_stats{std::size(letter_groups)};
-	std::ranges::for_each(sources, [&word_stats, &letter_groups](auto file) {
-		word_stats += langmorph::load(file, [&letter_groups](auto file) {
-			return load(std::type_identity<langmorph::word_stats>{}, langmorph::stream_tokenizer{file}, letter_groups);
-		});
-	});
-
-	return word_stats;
-}
-
-void collect_stats(std::string_view statfile,
-                   std::span<std::string_view const> sources,
-                   std::string_view letter_groups_file)
-{
-	auto letter_groups = load(langmorph::letter_group_file_resolver{letter_groups_file}, [](auto file) {
-		return load(std::type_identity<langmorph::letter_group_index>{}, langmorph::stream_tokenizer{file});
-	});
-	auto word_stats = collect_stats(letter_groups, sources);
-
-	store(
-		statfile,
-		savestate{
-			.letter_groups = std::move(letter_groups),
-			.word_stats = std::move(word_stats)
-		}
-	);
 }
 
 auto load(std::type_identity<savestate>, std::string_view statfile)
@@ -245,6 +214,37 @@ auto load(std::type_identity<savestate>, std::string_view statfile)
 	}
 
 	return savestate{std::move(letter_groups), langmorph::word_stats{std::move(word_lengths), std::move(transition_rates)}};
+}
+
+auto collect_stats(langmorph::letter_group_index const& letter_groups, std::span<std::string_view const> sources)
+{
+	langmorph::word_stats word_stats{std::size(letter_groups)};
+	std::ranges::for_each(sources, [&word_stats, &letter_groups](auto file) {
+		word_stats += langmorph::load(file, [&letter_groups](auto file) {
+			return load(std::type_identity<langmorph::word_stats>{}, langmorph::stream_tokenizer{file}, letter_groups);
+		});
+	});
+
+	return word_stats;
+}
+
+auto collect_stats(std::span<std::string_view const> sources, std::string_view letter_groups_file)
+{
+	auto letter_groups = load(langmorph::letter_group_file_resolver{letter_groups_file}, [](auto file) {
+		return load(std::type_identity<langmorph::letter_group_index>{}, langmorph::stream_tokenizer{file});
+	});
+	auto word_stats = collect_stats(letter_groups, sources);
+	return savestate{
+		.letter_groups = std::move(letter_groups),
+		.word_stats = std::move(word_stats)
+	};
+}
+
+void collect_stats(std::string_view statfile,
+                   std::span<std::string_view const> sources,
+                   std::string_view letter_groups_file)
+{
+	store(statfile, collect_stats(sources, letter_groups_file));
 }
 
 void collect_stats(std::string_view statfile, std::span<std::string_view const> sources)
