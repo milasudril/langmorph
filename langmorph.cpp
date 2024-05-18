@@ -281,33 +281,44 @@ int collect_stats(std::span<std::string_view const> args)
 	return 0;
 }
 
-std::string make_word(
-	std::mt19937& rng,
-	std::discrete_distribution<size_t>& word_length,
-	langmorph::bivar_discrete_distribution& letter_group_probs,
-	langmorph::letter_group_index const& letter_groups
-)
+class word_factoroy
 {
-	auto const length = word_length(rng);
-	while(true)
+public:
+	explicit word_factoroy(savestate&& savestate):
+		m_word_length{langmorph::gen_pmf(savestate.word_stats.length_histogram()())},
+		m_letter_group_probs{savestate.word_stats.transition_rates()},
+		m_letter_groups{std::move(savestate.letter_groups)}
+	{}
+
+	template<class Rng>
+	std::string operator()(Rng&& rng)
 	{
-		size_t actual_length = 0;
-		auto current_group = letter_group_probs.col(0, rng);
-		std::string word{letter_groups.get(langmorph::letter_group_id{current_group}).value()};
+		auto const length = m_word_length(rng);
 		while(true)
 		{
-			current_group = letter_group_probs.col(current_group, rng);
-			if(current_group == 0)
+			size_t actual_length = 0;
+			auto current_group = m_letter_group_probs.col(0, rng);
+			std::string word{m_letter_groups.get(langmorph::letter_group_id{current_group}).value()};
+			while(true)
 			{
-				break;
+				current_group = m_letter_group_probs.col(current_group, rng);
+				if(current_group == 0)
+				{
+					break;
+				}
+				++actual_length;
+				word += m_letter_groups.get(langmorph::letter_group_id{current_group}).value();
 			}
-			++actual_length;
-			word += letter_groups.get(langmorph::letter_group_id{current_group}).value();
+			if(actual_length == length)
+			{	return word; }
 		}
-		if(actual_length == length)
-		{	return word; }
 	}
-}
+
+private:
+	std::discrete_distribution<size_t> m_word_length;
+	langmorph::bivar_discrete_distribution m_letter_group_probs;
+	langmorph::letter_group_index m_letter_groups;
+};
 
 int make_words(std::span<std::string_view const> args)
 {
@@ -316,17 +327,13 @@ int make_words(std::span<std::string_view const> args)
 		puts(R"(Try langmorph help make-words)");
 	}
 
-	auto const savestate = load(std::type_identity<struct savestate>{}, args[0]);
+	word_factoroy factory{load(std::type_identity<struct savestate>{}, args[0])};
 	auto const num_words = static_cast<size_t>(std::stoll(std::string{args[1]}));
 
-	auto word_length = langmorph::gen_pmf(savestate.word_stats.length_histogram()());
-	langmorph::bivar_discrete_distribution letter_group_probs{savestate.word_stats.transition_rates()};
-
 	std::mt19937 rng;
-
 	for(size_t k = 0; k != num_words; ++k)
 	{
-		puts(make_word(rng, word_length, letter_group_probs, savestate.letter_groups).c_str());
+		puts(factory(rng).c_str());
 	}
 
 	return 0;
