@@ -53,6 +53,17 @@ namespace langmorph
 			assert(std::size(letter_groups) == m_transition_rates.node_count());
 
 			auto word_split = split_longest(word, letter_groups);
+			if(std::size(word_split) == 0)
+			{
+				// NOTE: Word should be null terminated at this point
+				// TODO: Should use std::print in the future
+				fprintf(
+					stderr,
+					"warning: Skipping word \"%s\" due since it contains at least one unrecognized letter group\n",
+					word.data()
+				);
+				return;
+			}
 			if(std::size(word_split) < 3)
 			{ return; }
 

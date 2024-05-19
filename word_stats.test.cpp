@@ -24,6 +24,7 @@ TESTCASE(langmorph_wordstats_load)
 	words.push(std::string{"schlager"});
 	words.push(std::string{"hej"});
 	words.push(std::string{"är"});
+	words.push(std::string{"amismatch"});
 
 	auto letter_groups = load(std::type_identity<langmorph::letter_group_index>{}, letter_groups_in);
 

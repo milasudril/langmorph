@@ -60,9 +60,7 @@ namespace langmorph
 		{
 			auto const slice = std::string_view{std::begin(word), ptr};
 			if(letter_groups.contains(slice))
-			{
-				return std::pair{slice, std::string_view{std::end(slice), std::end(word)}};
-			}
+			{ return std::pair{slice, std::string_view{std::end(slice), std::end(word)}}; }
 			--ptr;
 		}
 
@@ -85,9 +83,7 @@ namespace langmorph
 			ret.push_back(token.first);
 		}
 		else
-		{
-			ret.clear();
-		}
+		{ ret.clear(); }
 
 		return ret;
 	}
