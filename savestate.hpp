@@ -17,13 +17,13 @@ namespace langmorph
 	void store(
 		std::string_view statfile,
 		savestate const& state,
-		std::string_view statfile_entry = "langmorph_data"
+		std::string_view statfile_entry
 	);
 
 	savestate load(
 		std::type_identity<savestate>,
 		std::string_view statfile,
-		std::string_view statfile_entry = "langmorph_data"
+		std::string_view statfile_entry
 	);
 }
 #endif
