@@ -8,10 +8,10 @@
 
 namespace langmorph
 {
-	class word_factoroy
+	class word_factory
 	{
 	public:
-		explicit word_factoroy(struct savestate&& savestate):
+		explicit word_factory(struct savestate&& savestate):
 			m_word_length{gen_pmf(savestate.word_stats.length_histogram()())},
 			m_letter_group_probs{savestate.word_stats.transition_rates()},
 			m_letter_groups{std::move(savestate.letter_groups)}
@@ -46,6 +46,15 @@ namespace langmorph
 		bivar_discrete_distribution m_letter_group_probs;
 		letter_group_index m_letter_groups;
 	};
+
+	inline auto create(
+		std::type_identity<word_factory>,
+		std::string_view statefile,
+		std::string_view statefile_entry
+	)
+	{
+		return word_factory{load(std::type_identity<savestate>{}, statefile, statefile_entry)};
+	}
 }
 
 #endif

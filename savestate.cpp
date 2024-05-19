@@ -4,19 +4,19 @@
 #include "./io_utils.hpp"
 #include "./stream_tokenizer.hpp"
 
-void langmorph::store(std::string_view statfile, savestate const& state, std::string_view statfile_entry)
+void langmorph::store(std::string_view statefile, savestate const& state, std::string_view statefile_entry)
 {
 	constexpr auto store_creation_mode = Wad64::FileCreationMode::AllowOverwriteWithTruncation()
 		.allowCreation();
 
-	Wad64::FdOwner output_file{std::string{statfile}.c_str(),
+	Wad64::FdOwner output_file{std::string{statefile}.c_str(),
 		Wad64::IoMode::AllowRead().allowWrite(),
 		store_creation_mode};
 	Wad64::Archive archive{std::ref(output_file)};
 	{
 		wad64_output_adapter output{
 			std::ref(archive),
-			std::string{statfile_entry}.append("/letter_groups"),
+			std::string{statefile_entry}.append("/letter_groups"),
 			store_creation_mode
 		};
 		auto output_file = create_file(output);
@@ -26,7 +26,7 @@ void langmorph::store(std::string_view statfile, savestate const& state, std::st
 	{
 		Wad64::OutputFile output{
 			std::ref(archive),
-			std::string{statfile_entry}.append("/word_lengths"),
+			std::string{statefile_entry}.append("/word_lengths"),
 			store_creation_mode
 		};
 		store(state.word_stats.length_histogram(), output);
@@ -35,7 +35,7 @@ void langmorph::store(std::string_view statfile, savestate const& state, std::st
 	{
 		Wad64::OutputFile output{
 			std::ref(archive),
-			std::string{statfile_entry}.append("/transition_rates"),
+			std::string{statefile_entry}.append("/transition_rates"),
 			store_creation_mode
 		};
 		store(state.word_stats.transition_rates(), output);
@@ -44,18 +44,18 @@ void langmorph::store(std::string_view statfile, savestate const& state, std::st
 
 langmorph::savestate langmorph::load(
 	std::type_identity<savestate>,
-	std::string_view statfile,
-	std::string_view statfile_entry
+	std::string_view statefile,
+	std::string_view statefile_entry
 )
 {
 	constexpr auto load_creation_mode = Wad64::FileCreationMode::DontCare();
-	Wad64::FdOwner input_file{std::string{statfile}.c_str(), Wad64::IoMode::AllowRead(), load_creation_mode};
+	Wad64::FdOwner input_file{std::string{statefile}.c_str(), Wad64::IoMode::AllowRead(), load_creation_mode};
 	Wad64::ReadonlyArchive archive{std::ref(input_file)};
 
 	auto letter_groups = with(
 		wad64_input_adapter{
 			std::ref(archive),
-			std::string{statfile_entry}.append("/letter_groups")
+			std::string{statefile_entry}.append("/letter_groups")
 		},
 		[](auto&& input) {
 			auto input_file = create_file(input);
@@ -68,7 +68,7 @@ langmorph::savestate langmorph::load(
 		std::type_identity<histogram>{},
 		Wad64::InputFile{
 			Wad64::ArchiveView{archive},
-			std::string{statfile_entry}.append("/word_lengths")
+			std::string{statefile_entry}.append("/word_lengths")
 		}
 	);
 
@@ -76,7 +76,7 @@ langmorph::savestate langmorph::load(
 		std::type_identity<transition_rate_table>{},
 		Wad64::InputFile{
 			Wad64::ArchiveView{archive},
-			std::string{statfile_entry}.append("/transition_rates")
+			std::string{statefile_entry}.append("/transition_rates")
 		}
 	);
 

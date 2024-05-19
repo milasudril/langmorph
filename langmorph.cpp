@@ -163,7 +163,7 @@ int make_words(std::span<std::string_view const> args)
 		return -1;
 	}
 
-	langmorph::word_factoroy factory{load(std::type_identity<langmorph::savestate>{}, args[0], "langmorph_data")};
+	auto factory = create(std::type_identity<langmorph::word_factory>{}, args[0], "langmorph_data");
 	auto const num_words = static_cast<size_t>(std::stoll(std::string{args[1]}));
 
 	std::mt19937 rng;

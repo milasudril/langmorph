@@ -15,15 +15,15 @@ namespace langmorph
 	};
 
 	void store(
-		std::string_view statfile,
+		std::string_view statefile,
 		savestate const& state,
-		std::string_view statfile_entry
+		std::string_view statefile_entry
 	);
 
 	savestate load(
 		std::type_identity<savestate>,
-		std::string_view statfile,
-		std::string_view statfile_entry
+		std::string_view statefile,
+		std::string_view statefile_entry
 	);
 }
 #endif
