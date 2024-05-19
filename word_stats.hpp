@@ -92,7 +92,7 @@ namespace langmorph
 		transition_rate_table m_transition_rates;
 	};
 
-	word_stats operator+(word_stats&& a, word_stats const& b)
+	inline word_stats operator+(word_stats&& a, word_stats const& b)
 	{
 		return std::move(a += b);
 	}
@@ -100,7 +100,7 @@ namespace langmorph
 
 	constexpr size_t num_workers = 15;
 
-	std::vector<word_stats> create_word_stats(size_t size)
+	inline std::vector<word_stats> create_word_stats(size_t size)
 	{
 		std::vector<word_stats> ret;
 		std::generate_n(std::back_inserter(ret), num_workers, [size](){return word_stats{size};});

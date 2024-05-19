@@ -117,7 +117,7 @@ namespace langmorph
 		letter_group_id m_last_id;
 	};
 
-	void store(letter_group_index const& letter_groups, FILE* f)
+	inline void store(letter_group_index const& letter_groups, FILE* f)
 	{
 		std::ranges::for_each(letter_groups.by_id(), [f](auto const& item){
 			fprintf(f, "%s\n", item.second.c_str());

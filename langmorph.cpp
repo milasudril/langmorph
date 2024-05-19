@@ -1,10 +1,11 @@
-//@	{"target":{"name":"langmorph.o", "pkgconfig_libs":["wad64"]}}
+//@	{"target":{"name":"langmorph.o"}}
 
 #include "./savestate.hpp"
 #include "./io_utils.hpp"
 #include "./letter_group.hpp"
 #include "./prob_distributions.hpp"
 #include "./letter_group_file_resolver.hpp"
+#include "./stream_tokenizer.hpp"
 
 #include <random>
 
