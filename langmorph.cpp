@@ -160,6 +160,7 @@ int make_words(std::span<std::string_view const> args)
 	if(std::size(args) < 2)
 	{
 		puts(R"(Try langmorph help make-words)");
+		return -1;
 	}
 
 	langmorph::word_factoroy factory{load(std::type_identity<langmorph::savestate>{}, args[0], "langmorph_data")};
