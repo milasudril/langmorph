@@ -14,8 +14,16 @@ namespace langmorph
 		class word_stats word_stats;
 	};
 
-	void store(std::string_view statfile, savestate const& state);
+	void store(
+		std::string_view statfile,
+		savestate const& state,
+		std::string_view statfile_entry = "langmorph_data"
+	);
 
-	savestate load(std::type_identity<savestate>, std::string_view statfile);
+	savestate load(
+		std::type_identity<savestate>,
+		std::string_view statfile,
+		std::string_view statfile_entry = "langmorph_data"
+	);
 }
 #endif
