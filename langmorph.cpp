@@ -1,13 +1,11 @@
 //@	{"target":{"name":"langmorph.o"}}
 
+#include "./word_factory.hpp"
 #include "./savestate.hpp"
 #include "./io_utils.hpp"
 #include "./letter_group.hpp"
-#include "./prob_distributions.hpp"
 #include "./letter_group_file_resolver.hpp"
 #include "./stream_tokenizer.hpp"
-
-#include <random>
 
 int show_help_general()
 {
@@ -157,45 +155,6 @@ int collect_stats(std::span<std::string_view const> args)
 	return 0;
 }
 
-class word_factoroy
-{
-public:
-	explicit word_factoroy(langmorph::savestate&& savestate):
-		m_word_length{langmorph::gen_pmf(savestate.word_stats.length_histogram()())},
-		m_letter_group_probs{savestate.word_stats.transition_rates()},
-		m_letter_groups{std::move(savestate.letter_groups)}
-	{}
-
-	template<class Rng>
-	std::string operator()(Rng&& rng)
-	{
-		auto const length = m_word_length(rng);
-		while(true)
-		{
-			size_t actual_length = 0;
-			auto current_group = m_letter_group_probs.col(0, rng);
-			std::string word{m_letter_groups.get(langmorph::letter_group_id{current_group}).value()};
-			while(true)
-			{
-				current_group = m_letter_group_probs.col(current_group, rng);
-				if(current_group == 0)
-				{
-					break;
-				}
-				++actual_length;
-				word += m_letter_groups.get(langmorph::letter_group_id{current_group}).value();
-			}
-			if(actual_length == length)
-			{	return word; }
-		}
-	}
-
-private:
-	std::discrete_distribution<size_t> m_word_length;
-	langmorph::bivar_discrete_distribution m_letter_group_probs;
-	langmorph::letter_group_index m_letter_groups;
-};
-
 int make_words(std::span<std::string_view const> args)
 {
 	if(std::size(args) < 2)
@@ -203,7 +162,7 @@ int make_words(std::span<std::string_view const> args)
 		puts(R"(Try langmorph help make-words)");
 	}
 
-	word_factoroy factory{load(std::type_identity<langmorph::savestate>{}, args[0])};
+	langmorph::word_factoroy factory{load(std::type_identity<langmorph::savestate>{}, args[0])};
 	auto const num_words = static_cast<size_t>(std::stoll(std::string{args[1]}));
 
 	std::mt19937 rng;
