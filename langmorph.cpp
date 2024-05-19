@@ -1,18 +1,10 @@
 //@	{"target":{"name":"langmorph.o", "pkgconfig_libs":["wad64"]}}
 
+#include "./savestate.hpp"
 #include "./io_utils.hpp"
 #include "./letter_group.hpp"
-#include "./stream_tokenizer.hpp"
-#include "./letter_group_index.hpp"
-#include "./word_stats.hpp"
 #include "./prob_distributions.hpp"
 #include "./letter_group_file_resolver.hpp"
-
-#include <wad64/archive.hpp>
-#include <wad64/readonly_archive.hpp>
-#include <wad64/fd_owner.hpp>
-#include <wad64/output_file.hpp>
-#include <wad64/input_file.hpp>
 
 #include <random>
 
@@ -95,127 +87,6 @@ int show_help(std::span<std::string_view const> args)
 	return show_help(args[0]);
 }
 
-class wad64_output_adapter
-{
-public:
-	static constexpr auto is_output = true;
-	static constexpr auto seek_set = Wad64::SeekMode::Set;
-	static constexpr auto seek_cur = Wad64::SeekMode::Cur;
-	static constexpr auto seek_end = Wad64::SeekMode::End;
-
-	template<class First, class ...Args>
-	explicit wad64_output_adapter(First&& first, Args&& ... args)
-		requires (!std::same_as<std::decay_t<First>, wad64_output_adapter>):
-		m_output{std::forward<First>(first), std::forward<Args>(args)...}
-	{}
-
-	decltype(auto) write(std::span<std::byte const> buffer)
-	{
-		return m_output.write(buffer);
-	}
-
-	decltype(auto) seek(int64_t offset, Wad64::SeekMode mode)
-	{
-		return m_output.seek(offset, mode);
-	}
-
-	static void close() {}
-
-
-private:
-	Wad64::OutputFile m_output;
-};
-
-class wad64_input_adapter
-{
-public:
-	static constexpr auto is_output = false;
-	static constexpr auto seek_set = Wad64::SeekMode::Set;
-	static constexpr auto seek_cur = Wad64::SeekMode::Cur;
-	static constexpr auto seek_end = Wad64::SeekMode::End;
-
-	template<class First, class ...Args>
-	explicit wad64_input_adapter(First&& first, Args&& ... args)
-		requires (!std::same_as<std::decay_t<First>, wad64_input_adapter>):
-		m_input{Wad64::ArchiveView{std::forward<First>(first)}, std::forward<Args>(args)...}
-	{}
-
-	decltype(auto) read(std::span<std::byte> buffer)
-	{
-		return m_input.read(buffer);
-	}
-
-	decltype(auto) seek(int64_t offset, Wad64::SeekMode mode)
-	{
-		return m_input.seek(offset, mode);
-	}
-
-	static void close() {}
-
-
-private:
-	Wad64::InputFile m_input;
-};
-
-struct savestate
-{
-	langmorph::letter_group_index letter_groups;
-	langmorph::word_stats word_stats;
-};
-
-void store(std::string_view statfile, savestate const& state)
-{
-	constexpr auto store_creation_mode = Wad64::FileCreationMode::AllowOverwriteWithTruncation()
-		.allowCreation();
-
-	Wad64::FdOwner output_file{std::string{statfile}.c_str(),
-		Wad64::IoMode::AllowRead().allowWrite(),
-		store_creation_mode};
-	Wad64::Archive archive{std::ref(output_file)};
-	{
-		wad64_output_adapter output{std::ref(archive), "langmorph_data/letter_groups", store_creation_mode};
-		auto output_file = langmorph::create_file(output);
-		store(state.letter_groups, output_file.first.get());
-	}
-
-	{
-		Wad64::OutputFile output{std::ref(archive), "langmorph_data/word_lengths", store_creation_mode};
-		store(state.word_stats.length_histogram(), output);
-	}
-
-	{
-		Wad64::OutputFile output{std::ref(archive), "langmorph_data/transition_rates", store_creation_mode};
-		store(state.word_stats.transition_rates(), output);
-	}
-}
-
-auto load(std::type_identity<savestate>, std::string_view statfile)
-{
-	constexpr auto load_creation_mode = Wad64::FileCreationMode::DontCare();
-	Wad64::FdOwner input_file{std::string{statfile}.c_str(), Wad64::IoMode::AllowRead(), load_creation_mode};
-	Wad64::ReadonlyArchive archive{std::ref(input_file)};
-
-	auto letter_groups = langmorph::with(wad64_input_adapter{std::ref(archive), "langmorph_data/letter_groups"},
-		[](auto&& input) {
-			auto input_file = langmorph::create_file(input);
-			return load(std::type_identity<langmorph::letter_group_index>{},
-				langmorph::stream_tokenizer{input_file.first.get()});
-		});
-
-	auto word_lengths = load(std::type_identity<langmorph::histogram>{},
-		Wad64::InputFile{Wad64::ArchiveView{archive}, "langmorph_data/word_lengths"});
-
-	auto transition_rates = load(std::type_identity<langmorph::transition_rate_table>{},
-		Wad64::InputFile{Wad64::ArchiveView{archive}, "langmorph_data/transition_rates"});
-
-	if(std::size(letter_groups) != transition_rates.node_count())
-	{
-		throw std::runtime_error{"Tried to load an invalid stat file"};
-	}
-
-	return savestate{std::move(letter_groups), langmorph::word_stats{std::move(word_lengths), std::move(transition_rates)}};
-}
-
 auto collect_stats(langmorph::letter_group_index const& letter_groups, std::span<std::string_view const> sources)
 {
 	langmorph::word_stats word_stats{std::size(letter_groups)};
@@ -234,7 +105,7 @@ auto collect_stats(std::span<std::string_view const> sources, std::string_view l
 		return load(std::type_identity<langmorph::letter_group_index>{}, langmorph::stream_tokenizer{file});
 	});
 	auto word_stats = collect_stats(letter_groups, sources);
-	return savestate{
+	return langmorph::savestate{
 		.letter_groups = std::move(letter_groups),
 		.word_stats = std::move(word_stats)
 	};
@@ -249,7 +120,7 @@ void collect_stats(std::string_view statfile,
 
 void collect_stats(std::string_view statfile, std::span<std::string_view const> sources)
 {
-	auto savestate = load(std::type_identity<struct savestate>{}, statfile);
+	auto savestate = load(std::type_identity<langmorph::savestate>{}, statfile);
 	savestate.word_stats += collect_stats(savestate.letter_groups, sources);
 	store(statfile, savestate);
 }
@@ -288,7 +159,7 @@ int collect_stats(std::span<std::string_view const> args)
 class word_factoroy
 {
 public:
-	explicit word_factoroy(savestate&& savestate):
+	explicit word_factoroy(langmorph::savestate&& savestate):
 		m_word_length{langmorph::gen_pmf(savestate.word_stats.length_histogram()())},
 		m_letter_group_probs{savestate.word_stats.transition_rates()},
 		m_letter_groups{std::move(savestate.letter_groups)}
@@ -331,7 +202,7 @@ int make_words(std::span<std::string_view const> args)
 		puts(R"(Try langmorph help make-words)");
 	}
 
-	word_factoroy factory{load(std::type_identity<struct savestate>{}, args[0])};
+	word_factoroy factory{load(std::type_identity<langmorph::savestate>{}, args[0])};
 	auto const num_words = static_cast<size_t>(std::stoll(std::string{args[1]}));
 
 	std::mt19937 rng;

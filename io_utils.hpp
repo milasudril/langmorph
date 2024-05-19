@@ -1,6 +1,12 @@
 #ifndef LANGMORPH_IOUTILS_HPP
 #define LANGMORPH_IOUTILS_HPP
 
+#include <wad64/archive.hpp>
+#include <wad64/readonly_archive.hpp>
+#include <wad64/fd_owner.hpp>
+#include <wad64/output_file.hpp>
+#include <wad64/input_file.hpp>
+
 #include <cstdio>
 #include <memory>
 #include <filesystem>
@@ -148,6 +154,68 @@ namespace langmorph
 	{
 		return f(std::forward<Obj>(obj), std::forward<Args>(args)...);
 	}
+
+	class wad64_output_adapter
+	{
+	public:
+		static constexpr auto is_output = true;
+		static constexpr auto seek_set = Wad64::SeekMode::Set;
+		static constexpr auto seek_cur = Wad64::SeekMode::Cur;
+		static constexpr auto seek_end = Wad64::SeekMode::End;
+
+		template<class First, class ...Args>
+		explicit wad64_output_adapter(First&& first, Args&& ... args)
+			requires (!std::same_as<std::decay_t<First>, wad64_output_adapter>):
+			m_output{std::forward<First>(first), std::forward<Args>(args)...}
+		{}
+
+		decltype(auto) write(std::span<std::byte const> buffer)
+		{
+			return m_output.write(buffer);
+		}
+
+		decltype(auto) seek(int64_t offset, Wad64::SeekMode mode)
+		{
+			return m_output.seek(offset, mode);
+		}
+
+		static void close() {}
+
+
+	private:
+		Wad64::OutputFile m_output;
+	};
+
+	class wad64_input_adapter
+	{
+	public:
+		static constexpr auto is_output = false;
+		static constexpr auto seek_set = Wad64::SeekMode::Set;
+		static constexpr auto seek_cur = Wad64::SeekMode::Cur;
+		static constexpr auto seek_end = Wad64::SeekMode::End;
+
+		template<class First, class ...Args>
+		explicit wad64_input_adapter(First&& first, Args&& ... args)
+			requires (!std::same_as<std::decay_t<First>, wad64_input_adapter>):
+			m_input{Wad64::ArchiveView{std::forward<First>(first)}, std::forward<Args>(args)...}
+		{}
+
+		decltype(auto) read(std::span<std::byte> buffer)
+		{
+			return m_input.read(buffer);
+		}
+
+		decltype(auto) seek(int64_t offset, Wad64::SeekMode mode)
+		{
+			return m_input.seek(offset, mode);
+		}
+
+		static void close() {}
+
+
+	private:
+		Wad64::InputFile m_input;
+	};
 }
 
 #endif

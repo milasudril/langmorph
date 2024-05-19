@@ -98,7 +98,7 @@ namespace langmorph
 	}
 
 
-	constexpr size_t num_workers = 1;
+	constexpr size_t num_workers = 15;
 
 	std::vector<word_stats> create_word_stats(size_t size)
 	{
