@@ -4,103 +4,30 @@ A command line tool to generate new words, given a set of known letter groups, a
 
 ## Some generated words
 
-bais
-when'd
-boreomphrels
-wier
-Buat
-ulis
-mereve
-Bute
-helive
-livene
-fealy
-heleie
-Tisey
-notly
-lilst
-fimat
-shathits
-Buty
-woured's
-Sake
-shordidy
-divell
-grone
-ganno
-Clave
-Thave
-bese
-pejettl
-harer
-eakim
-Thelouryourse
-Wiompere
-wele
-ford's
-rave
-meller
-Jome
-withe
-fiveth
-Enfinoy
-erer
-acker
-Bustr
-dreakimim
-vents
-Suicheep
-ulips
-time
-fowind
-more
-savot
-bustr
-nethetedit
-hensp
-thivey
-foble
-papave
-herse
-dapealor
-hark'd
-Burtus
-thereft
-gooke
-bueor
-hathat
-wicas
-ashoss'd
-demast
-Chrike
-shertepomis
-beavefard
-thety
-Wisut
-matand
-gake
-bupece
-mer's
-feild
-trumpt
-leathe
-fonaregay
-cohistyous
-Eisy
-hare
-Midye
-slelty
-cedin
-porere
-plaportullord
-dithe
-presay
-furew
-hacke
-couldillor
-Thicove
-fonemour
-addendet
-terlanksis
-frivoung
-thandable
+|                 |                   |                  |                |
+| :---            | :---              | :---             | :---           |
+| bais            |  Thave            | savot            | bupece         |
+| when'd          |  bese             | bustr            | mer's          |
+| boreomphrels    |  pejettl          | nethetedit       | feild          |
+| wier            |  harer            | hensp            | trumpt         |
+| Buat            |  eakim            | thivey           | leathe         |
+| ulis            |  Thelouryourse    | foble            | fonaregay      |
+| mereve          |  Wiompere         | papave           | cohistyous     |
+| Bute            |  wele             | herse            | Eisy           |
+| helive          |  ford's           | dapealor         | hare           |
+| livene          |  rave             | hark'd           | Midye          |
+| fealy           |  meller           | Burtus           | slelty         |
+| heleie          |  Jome             | thereft          | cedin          |
+| Tisey           |  withe            | gooke            | porere         |
+| notly           |  fiveth           | bueor            | plaportullord  |
+| lilst           |  Enfinoy          | hathat           | dithe          |
+| fimat           |  erer             | wicas            | presay         |
+| shathits        |  acker            | ashoss'd         | furew          |
+| Buty            |  Bustr            | demast           | hacke          |
+| woured's        |  dreakimim        | Chrike           | couldillor     |
+| Sake            |  vents            | shertepomis      | Thicove        |
+| shordidy        |  Suicheep         | beavefard        | fonemour       |
+| divell          |  ulips            | thety            | addendet       |
+| grone           |  time             | Wisut            | terlanksis     |
+| ganno           |  fowind           | matand           | frivoung       |
+| Clave           |  more             | gake             | thandable      |
