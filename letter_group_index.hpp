@@ -111,6 +111,16 @@ namespace langmorph
 			return m_group_to_id;
 		}
 
+		void erase(letter_group_id id)
+		{
+			auto const group = m_id_to_group.find(id);
+			if(group == std::end(m_id_to_group))
+			{ return; }
+
+			m_group_to_id.erase(group->second.value());
+			m_id_to_group.erase(group);
+		}
+
 	private:
 		std::map<letter_group_id, letter_group> m_id_to_group;
 		std::map<std::string_view, letter_group_id> m_group_to_id;
