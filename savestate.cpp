@@ -85,3 +85,17 @@ langmorph::savestate langmorph::load(
 
 	return savestate{std::move(letter_groups), word_stats{std::move(word_lengths), std::move(transition_rates)}};
 }
+
+void langmorph::strip(savestate& state)
+{
+	auto const letter_group_usecount = state.word_stats.letter_group_usecount();
+	for(size_t k = 0; k != std::size(letter_group_usecount); ++k)
+	{
+		auto const count = letter_group_usecount[k];
+		if(count != 0)
+		{
+			auto const letter_group = state.letter_groups.get(langmorph::letter_group_id{k});
+			printf("%zu [%s]\n", count, letter_group.c_str());
+		}
+	}
+}
