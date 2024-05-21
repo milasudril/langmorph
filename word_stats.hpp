@@ -20,8 +20,6 @@ namespace langmorph
 			m_transition_rates{std::size(letter_groups)},
 			m_letter_group_usecount{std::make_unique<size_t[]>(std::size(letter_groups))}
 		{
-			printf("%zu\n", std::size(letter_groups));
-			printf("%zu\n", m_transition_rates.col_count());
 			size_t wordcount = 0;
 			while(!words.empty())
 			{

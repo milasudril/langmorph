@@ -104,6 +104,18 @@ auto collect_stats(std::span<std::string_view const> sources, std::string_view l
 		return load(std::type_identity<langmorph::letter_group_index>{}, langmorph::stream_tokenizer{file});
 	});
 	auto word_stats = collect_stats(letter_groups, sources);
+
+	size_t k = 0;
+	for(auto count: word_stats.letter_group_usecount())
+	{
+		if(count != 0)
+		{
+			auto const letter_group = letter_groups.get(langmorph::letter_group_id{k});
+			printf("%zu [%s]\n", count, letter_group.c_str());
+		}
+		++k;
+	}
+
 	return langmorph::savestate{
 		.letter_groups = std::move(letter_groups),
 		.word_stats = std::move(word_stats)
