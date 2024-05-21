@@ -17,8 +17,11 @@ namespace langmorph
 	public:
 		template<class TokenStream>
 		explicit word_stats(TokenStream&& words, letter_group_index const& letter_groups):
-			m_transition_rates{std::size(letter_groups)}
+			m_transition_rates{std::size(letter_groups)},
+			m_letter_group_usecount{std::make_unique<size_t[]>(std::size(letter_groups))}
 		{
+			printf("%zu\n", std::size(letter_groups));
+			printf("%zu\n", m_transition_rates.col_count());
 			size_t wordcount = 0;
 			while(!words.empty())
 			{
@@ -33,7 +36,10 @@ namespace langmorph
 			m_length_hist{std::move(hist)}, m_transition_rates{std::move(transition_rates)}
 		{}
 
-		explicit word_stats(size_t transition_rates_size):m_transition_rates{transition_rates_size}{}
+		explicit word_stats(size_t transition_rates_size):
+			m_transition_rates{transition_rates_size},
+			m_letter_group_usecount{std::make_unique<size_t[]>(transition_rates_size)}
+		{}
 
 		auto const& length_histogram() const
 		{ return m_length_hist; }
@@ -41,10 +47,17 @@ namespace langmorph
 		auto const& transition_rates() const
 		{ return m_transition_rates; }
 
+		std::span<size_t const> letter_group_usecount() const
+		{ return std::span{m_letter_group_usecount.get(), m_transition_rates.col_count() - 1}; }
+
 		word_stats& operator+=(word_stats const& other)
 		{
 			m_length_hist += other.m_length_hist;
 			m_transition_rates += other.m_transition_rates;
+			assert(m_transition_rates.col_count() == other.m_transition_rates.col_count());
+			auto const n = m_transition_rates.col_count();
+			for(size_t k = 0; k != n; ++k)
+			{ m_letter_group_usecount[k] += other.m_letter_group_usecount[k]; }
 			return *this;
 		}
 
@@ -70,13 +83,16 @@ namespace langmorph
 			++m_length_hist(langmorph::histogram_index{std::size(word_split)});
 			auto const separator = letter_groups.get(" ");
 			auto from = separator;
+			++m_letter_group_usecount[from.value()];
 			for(auto const& letter_group : word_split)
 			{
 				auto to = letter_groups.get(letter_group);
 				++m_transition_rates(langmorph::from_id{from.value()}, langmorph::to_id{to.value()});
 				from = to;
+				++m_letter_group_usecount[from.value()];
 			}
 			++m_transition_rates(langmorph::from_id{from.value()}, langmorph::to_id{separator.value()});
+			++m_letter_group_usecount[separator.value()];
 		}
 
 		void process(std::span<std::string const> word, letter_group_index const& letter_groups)
@@ -90,6 +106,7 @@ namespace langmorph
 	private:
 		langmorph::histogram m_length_hist;
 		transition_rate_table m_transition_rates;
+		std::unique_ptr<size_t[]> m_letter_group_usecount;
 	};
 
 	inline word_stats operator+(word_stats&& a, word_stats const& b)
