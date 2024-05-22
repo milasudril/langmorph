@@ -115,9 +115,7 @@ void collect_stats(std::string_view statfile,
                    std::span<std::string_view const> sources,
                    std::string_view letter_groups_file)
 {
-	auto tmp = collect_stats(sources, letter_groups_file);
-	strip(tmp);
-	store(statfile, tmp, "langmorph_data");
+	store(statfile, strip(collect_stats(sources, letter_groups_file)), "langmorph_data");
 }
 
 void collect_stats(std::string_view statfile, std::span<std::string_view const> sources)

@@ -80,6 +80,12 @@ namespace langmorph
 			return m_id_to_group.find(id)->second;
 		}
 
+		letter_group& get(letter_group_id id)
+		{
+			assert(m_id_to_group.contains(id));
+			return m_id_to_group.find(id)->second;
+		}
+
 		bool contains(letter_group const& group) const
 		{
 			return m_group_to_id.contains(group.value());

@@ -39,6 +39,9 @@ namespace langmorph
 			m_letter_group_usecount{std::make_unique<size_t[]>(transition_rates_size)}
 		{}
 
+		auto& length_histogram()
+		{ return m_length_hist; }
+
 		auto const& length_histogram() const
 		{ return m_length_hist; }
 

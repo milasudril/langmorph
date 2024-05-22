@@ -26,6 +26,6 @@ namespace langmorph
 		std::string_view statefile_entry
 	);
 
-	void strip(savestate& state);
+	savestate strip(savestate&& state);
 }
 #endif
