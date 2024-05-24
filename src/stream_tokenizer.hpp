@@ -1,4 +1,4 @@
-//@{"dependencies_extra":[{"ref":"stream_tokenizer.o","rel":"implementation"}]}
+//@{"dependencies_extra":[{"ref":"./stream_tokenizer.o","rel":"implementation"}]}
 
 #ifndef LANGMORPH_STREAMTOKENIZER_HPP
 #define LANGMORPH_STREAMTOKENIZER_HPP
