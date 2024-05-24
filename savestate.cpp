@@ -86,12 +86,22 @@ langmorph::savestate langmorph::load(
 	return savestate{std::move(letter_groups), word_stats{std::move(word_lengths), std::move(transition_rates)}};
 }
 
-langmorph::savestate langmorph::strip(savestate&& state)
+langmorph::savestate langmorph::remove_unused_letter_groups(savestate&& state)
 {
-	auto const letter_group_usecount = state.word_stats.letter_group_usecount();
+	auto const letter_group_count = std::size(state.letter_groups);
+	auto letter_group_usecount = std::make_unique<size_t[]>(std::size(state.letter_groups));
+	for(size_t k = 0; k != letter_group_count; ++k)
+	{
+		for(size_t l = 0; l != letter_group_count; ++l)
+		{
+			auto const val = state.word_stats.transition_rates()(from_id{k}, to_id{l});;
+			letter_group_usecount[k] += val;
+			letter_group_usecount[l] += val;
+		}
+	}
 
 	letter_group_index stripped_letter_groups;
-	for(size_t k = 0; k != std::size(letter_group_usecount); ++k)
+	for(size_t k = 0; k != letter_group_count; ++k)
 	{
 		if(letter_group_usecount[k] != 0)
 		{
@@ -102,20 +112,16 @@ langmorph::savestate langmorph::strip(savestate&& state)
 	}
 
 	auto const num_letter_groups = std::size(stripped_letter_groups);
-	printf("Reduced num letter groups from %zu to %zu\n",
-		std::size(letter_group_usecount),
-		num_letter_groups
-	);
 
 	transition_rate_table new_transition_rates{num_letter_groups};
 
-		size_t out_row = 0;
-	for(size_t k = 0; k != std::size(letter_group_usecount); ++k)
+	size_t out_row = 0;
+	for(size_t k = 0; k != letter_group_count; ++k)
 	{
 		if(letter_group_usecount[k] != 0)
 		{
 			size_t out_col = 0;
-			for(size_t l = 0; l != std::size(letter_group_usecount); ++l)
+			for(size_t l = 0; l != letter_group_count; ++l)
 			{
 				if(letter_group_usecount[l] != 0)
 				{

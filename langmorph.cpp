@@ -13,8 +13,13 @@ int show_help_general()
 
 Supported actions:
 
-collect-stats  collects statistics given a file with words and a file with valid letter groups
-make-words     generates a list of new words
+collect-stats                collects statistics given a file with words and a file with valid
+                             letter groups
+
+make-words                   generates a list of new words
+
+remove-unused-letter-groups  removes unused letter groups (those with 0 occurrences) from a
+                             stat file
 )");
 	return 0;
 }
@@ -63,6 +68,19 @@ use `langmorph collect-stats` to generate this file
 	return 0;
 }
 
+int show_help_remove_unused_letter_groups()
+{
+	puts(R"(Usage: langmorph remove-unused-letter-groups <stat file>
+
+# The stat file
+
+The stat file is expected to contain statistics on word lenght and letter group transtition rates.
+use `langmorph collect-stats` to generate this file
+)");
+
+	return 0;
+}
+
 int show_help(std::string_view cmd)
 {
 	if(cmd == "collect-stats")
@@ -74,6 +92,12 @@ int show_help(std::string_view cmd)
 	{
 		return show_help_make_words();
 	}
+
+	if(cmd == "remove-unused-letter-groups")
+	{
+		return show_help_remove_unused_letter_groups();
+	}
+
 	return show_help_general();
 }
 
@@ -115,7 +139,7 @@ void collect_stats(std::string_view statfile,
                    std::span<std::string_view const> sources,
                    std::string_view letter_groups_file)
 {
-	store(statfile, strip(collect_stats(sources, letter_groups_file)), "langmorph_data");
+	store(statfile, collect_stats(sources, letter_groups_file), "langmorph_data");
 }
 
 void collect_stats(std::string_view statfile, std::span<std::string_view const> sources)
@@ -176,6 +200,24 @@ int make_words(std::span<std::string_view const> args)
 	return 0;
 }
 
+int remove_unused_letter_groups(std::span<std::string_view const> args)
+{
+	if(std::size(args) < 1)
+	{
+		puts(R"(Try langmorph help remove-unused-letter-groups)");
+		return -1;
+	}
+
+	auto const statfile = args[0];
+	auto const result =
+		remove_unused_letter_groups(load(std::type_identity<langmorph::savestate>{}, statfile, "langmorph_data"));
+
+	store(statfile, result, "langmorph_data");
+
+	return 0;
+}
+
+
 std::vector<std::string_view> get_action_args(int argc, char const* const* argv)
 {
 	std::vector<std::string_view> ret;
@@ -213,6 +255,11 @@ try
 	if(action == "make-words")
 	{
 		return make_words(action_args);
+	}
+
+	if(action == "remove-unused-letter-groups")
+	{
+		return remove_unused_letter_groups(action_args);
 	}
 
 	return show_help(action_args);
