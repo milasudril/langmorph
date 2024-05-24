@@ -1,6 +1,6 @@
-# langmorph
+# Introduction
 
-A command line tool to generate new words, given a set of known letter groups, and a text corpus.
+`langmorph` is a command line tool to generate new words, given a set of known letter groups, and a text corpus.
 
 ## Usecases
 
