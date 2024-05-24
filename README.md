@@ -38,10 +38,29 @@ The list below shows some words produced by feeding `langmorph` with statistics 
 | ganno           | fowind            | matand          | frivoung       |
 | Clave           | more              | gake            | thandable      |
 
+# Using langmorph
+
+The command `langmorph` is used as follows
+
+`langmorph` **action** *command arguments*
+
+Supported actions:
+
+| Name                          | Description                                                                     |
+| :---                          | :---                                                                            |
+| `collect-stats`               | collects statistics given a file with words and a file with valid letter groups |
+| `help`                        | Shows help about `langmorph` or a given **action**                              |
+| `make-words`                  | generates a list of new words                                                   |
+| `remove-unused-letter-groups` | removes unused letter groups (those with 0 occurrences) from a stat file        |
+
 ## The letter group file
 
 The letter group file is a text file which lists known letter groups. A letter group is a cluster of letters that should be treated as an entity. Within the latin script this would be all letters, but also some combination of letters, depending on language. For English, `ch`, `sh`, `ght`, `ng`, `th`, and `wh`, are examples of common multi-letter groups. A letter group can also contain punctuations, such as `'d`.
 
-# The text corpus
+## The text corpus
 
 The text corpus should match the contents of the letter group file. In case a word within the corpus contains at least one unrecognized letter group, it is ignored.
+
+## The stat file
+
+The stat file contains all statistics used to generate new words. For simplicity, the data is stored raw binary form in a `wad64` archive. Currently, transferring the file between systems with different byte order will not work.
