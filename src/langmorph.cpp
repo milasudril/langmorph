@@ -7,6 +7,46 @@
 #include "./letter_group_file_resolver.hpp"
 #include "./stream_tokenizer.hpp"
 
+auto collect_stats(langmorph::letter_group_index const& letter_groups, std::span<std::string_view const> sources)
+{
+	langmorph::word_stats word_stats{std::size(letter_groups)};
+	std::ranges::for_each(sources, [&word_stats, &letter_groups](auto file) {
+		word_stats += langmorph::load(file, [&letter_groups](auto file) {
+			return load(std::type_identity<langmorph::word_stats>{}, langmorph::stream_tokenizer{file}, letter_groups);
+		});
+	});
+
+	return word_stats;
+}
+
+auto collect_stats(std::span<std::string_view const> sources, std::string_view letter_groups_file)
+{
+	auto letter_groups = load(langmorph::letter_group_file_resolver{letter_groups_file}, [](auto file) {
+		return load(std::type_identity<langmorph::letter_group_index>{}, langmorph::stream_tokenizer{file});
+	});
+	auto word_stats = collect_stats(letter_groups, sources);
+
+	return langmorph::savestate{
+		.letter_groups = std::move(letter_groups),
+		.word_stats = std::move(word_stats)
+	};
+}
+
+void collect_stats(std::string_view statfile,
+                   std::span<std::string_view const> sources,
+                   std::string_view letter_groups_file)
+{
+	store(statfile, collect_stats(sources, letter_groups_file), "langmorph_data");
+}
+
+void collect_stats(std::string_view statfile, std::span<std::string_view const> sources)
+{
+	auto savestate = load(std::type_identity<langmorph::savestate>{}, statfile, "langmorph_data");
+	savestate.word_stats += collect_stats(savestate.letter_groups, sources);
+	store(statfile, savestate, "langmorph_data");
+}
+
+
 int show_help_general()
 {
 	puts(R"(Usage: langmorph <action> [command arguments]
@@ -108,45 +148,6 @@ int show_help(std::span<std::string_view const> args)
 		return show_help_general();
 	}
 	return show_help(args[0]);
-}
-
-auto collect_stats(langmorph::letter_group_index const& letter_groups, std::span<std::string_view const> sources)
-{
-	langmorph::word_stats word_stats{std::size(letter_groups)};
-	std::ranges::for_each(sources, [&word_stats, &letter_groups](auto file) {
-		word_stats += langmorph::load(file, [&letter_groups](auto file) {
-			return load(std::type_identity<langmorph::word_stats>{}, langmorph::stream_tokenizer{file}, letter_groups);
-		});
-	});
-
-	return word_stats;
-}
-
-auto collect_stats(std::span<std::string_view const> sources, std::string_view letter_groups_file)
-{
-	auto letter_groups = load(langmorph::letter_group_file_resolver{letter_groups_file}, [](auto file) {
-		return load(std::type_identity<langmorph::letter_group_index>{}, langmorph::stream_tokenizer{file});
-	});
-	auto word_stats = collect_stats(letter_groups, sources);
-
-	return langmorph::savestate{
-		.letter_groups = std::move(letter_groups),
-		.word_stats = std::move(word_stats)
-	};
-}
-
-void collect_stats(std::string_view statfile,
-                   std::span<std::string_view const> sources,
-                   std::string_view letter_groups_file)
-{
-	store(statfile, collect_stats(sources, letter_groups_file), "langmorph_data");
-}
-
-void collect_stats(std::string_view statfile, std::span<std::string_view const> sources)
-{
-	auto savestate = load(std::type_identity<langmorph::savestate>{}, statfile, "langmorph_data");
-	savestate.word_stats += collect_stats(savestate.letter_groups, sources);
-	store(statfile, savestate, "langmorph_data");
 }
 
 int collect_stats(std::span<std::string_view const> args)
