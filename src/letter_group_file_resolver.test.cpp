@@ -67,7 +67,7 @@ TESTCASE(langmorph_letter_group_file_resolver_env)
 TESTCASE(langmorph_letter_group_file_resolver_exe_dir)
 {
 	unsetenv("LANGMORPH_HOME");
-	auto const expected_path = read_symlink(langmorph::fs::path{"/proc/self/exe"}).parent_path()
+	auto const expected_path = read_symlink(langmorph::fs::path{"/proc/self/exe"})
 	                         .parent_path() / "share" / "langmorph" / "foobar";
 	langmorph::letter_group_file_resolver resolver{"foobar"};
 	{

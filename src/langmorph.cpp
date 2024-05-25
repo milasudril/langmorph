@@ -81,7 +81,7 @@ read from <stat file>. Langmorph uses the following rules to locate the letter g
 1. If the path is absoulte, that path will be used
 2. If the name begins with `.`, the path is expected to be relative to the current
 3. The directory specified by the LANGMORPH_HOME environment variable
-4. <location of langmorph>/../../share/langmorph
+4. <location of langmorph>/../share/langmorph
 
 On a UNIX system, langmorph would typically be located in /usr/bin
 

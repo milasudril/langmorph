@@ -34,7 +34,7 @@ namespace langmorph
 				return true;
 			}
 
-			m_current_path = read_symlink(fs::path{"/proc/self/exe"}).parent_path().parent_path()
+			m_current_path = read_symlink(fs::path{"/proc/self/exe"}).parent_path()
 			               / "share" / "langmorph"
 			               / std::move(m_filename);
 			m_filename.clear();
