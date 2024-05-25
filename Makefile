@@ -19,6 +19,7 @@ install:
 		"install_to": "${PREFIX}${DESTDIR}",
 		"targets":[
 			"src/langmorph.app.maikerule",
-			"src/langmorph.lib.maikerule"
+			"src/langmorph.lib.maikerule",
+			"data/"
 		]
 	}'

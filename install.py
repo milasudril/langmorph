@@ -50,12 +50,19 @@ def install_application(target_dir, specfile_name, destdir):
 	shutil.copyfile(src_file_name, dest_file_name)
 	return 0
 
+def install_data(target_dir, specfile_name, destdir):
+	share_dir = destdir + '/share/langmorph'
+	shutil.copytree(specfile_name, share_dir)
+
 def install(target_dir, specfile_name, install_to):
 	if specfile_name.endswith('.lib.maikerule'):
 		return install_library(target_dir, specfile_name, install_to)
 
 	if specfile_name.endswith('.app.maikerule'):
 		return install_application(target_dir, specfile_name, install_to)
+
+	if specfile_name == 'data/':
+		return install_data(target_dir, specfile_name, install_to)
 
 if __name__ == '__main__':
 	if len(sys.argv) < 2:
