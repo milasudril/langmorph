@@ -2,7 +2,13 @@
 	"target":{"name":"liblangmorph.a"},
 	"dependencies":[
 		{"ref": "./word_factory.hpp", "origin":"project"},
+		{"ref": "./prob_distributions.hpp", "origin":"project"},
 		{"ref": "./savestate.hpp", "origin":"project"},
+		{"ref": "./letter_group_index.hpp", "origin":"project"},
+		{"ref": "./word_stats.hpp", "origin":"project"},
+		{"ref": "./input_queue.hpp", "origin":"project"},
+		{"ref": "./stat_counters.hpp", "origin":"project"},
+		{"ref": "./isqrt.hpp", "origin": "project"},
 		{"ref": "./io_utils.hpp", "origin":"project"},
 		{"ref": "./letter_group.hpp", "origin":"project"},
 		{"ref": "./stream_tokenizer.hpp", "origin":"project"}

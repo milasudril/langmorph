@@ -33,11 +33,17 @@ def install_library(target_dir, specfile_name, destdir):
 	src_file_name = target_dir + '/' + in_dir + '/'  + libinfo['target']['name']
 	dest_file_name = libdir + '/' + libinfo['target']['name']
 	print('Installing %s to %s'%(src_file_name, dest_file_name))
-	os.makedirs(libdir)
+	try:
+		os.makedirs(libdir)
+	except FileExistsError:
+		pass
 	shutil.copyfile(src_file_name, dest_file_name)
 
 	pkgconfig_dir = libdir + '/pkgconfig'
-	os.makedirs(pkgconfig_dir)
+	try:
+		os.makedirs(pkgconfig_dir)
+	except FileExistsError:
+		pass
 	with open(pkgconfig_dir + '/langmorph.pc', 'w') as f:
 		f.write(
 			'''Name: Langmorph
@@ -60,7 +66,10 @@ def install_application(target_dir, specfile_name, destdir):
 	src_file_name = target_dir + '/' + in_dir + '/'  + libinfo['target']['name']
 	dest_file_name = appdir + '/' + libinfo['target']['name']
 	print('Installing %s to %s'%(src_file_name, dest_file_name))
-	os.makedirs(appdir)
+	try:
+		os.makedirs(appdir)
+	except FileExistsError:
+		pass
 	shutil.copyfile(src_file_name, dest_file_name)
 	return 0
 

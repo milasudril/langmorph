@@ -1,6 +1,6 @@
 # Introduction
 
-`langmorph` is a command line tool to generate new words, given a set of known letter groups, and a text corpus.
+`langmorph` is a command line utility and library that generates new words, given a set of known letter groups, and a text corpus.
 
 ## Usecases
 
@@ -64,3 +64,42 @@ The text corpus should match the contents of the letter group file. In case a wo
 ## The stat file
 
 The stat file contains all statistics used to generate new words. For simplicity, the data is stored raw binary form in a `wad64` archive. Currently, transferring the file between systems with different byte order will not work.
+
+## How to compile langmorph
+
+1. Install `maike2` and `wad64`, and the standard C++ build utils
+2. Run the command `make`
+
+## How to install langmorph
+
+1. Compile langmorph
+2. Run the command `sudo make install`. If you do not have `sudo` privileges, you can set the PREFIX environment variable
+
+## Simple library usage
+
+Given the file `demo.cpp`
+
+```c++
+#include <langmorph/word_factory.hpp>
+#include <cstdio>
+#include <random>
+
+int main()
+{
+	auto factory = create(
+		std::type_identity<langmorph::word_factory>{},
+		"data/shakespeare.wad64",  // Name of stat file
+		"langmorph_data"           // "Lump" of langmorph data are stored in stats.wad64
+	);
+
+	std::mt19937 rng;
+	for(size_t k = 0; k != 100; ++k)
+	{ puts(factory(rng).c_str()); }
+}
+```
+
+You should be able to compile and link the application by using the following command
+
+```bash
+g++ $(pkg-config --cflags langmorph) -std=c++20 -o demo demo.cpp $(pkg-config --libs langmorph)
+```
