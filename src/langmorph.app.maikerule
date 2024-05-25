@@ -1,4 +1,6 @@
 {
-	 "target":{"name":"langmorph"}
-	,"dependencies":[{"ref":"./langmorph.o","rel":"implementation"}]
+	"target":{"name":"langmorph"},
+	"dependencies":[
+		{"ref":"./langmorph.o", "rel":"implementation"}
+	]
 }

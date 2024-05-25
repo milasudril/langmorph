@@ -1,0 +1,11 @@
+{
+	"target":{"name":"liblangmorph.a"},
+	"dependencies":[
+		{"ref": "./word_factory.hpp", "origin":"project"},
+		{"ref": "./savestate.hpp", "origin":"project"},
+		{"ref": "./io_utils.hpp", "origin":"project"},
+		{"ref": "./letter_group.hpp", "origin":"project"},
+		{"ref": "./letter_group_file_resolver.hpp", "origin":"project"},
+		{"ref": "./stream_tokenizer.hpp", "origin":"project"}
+	]
+}
