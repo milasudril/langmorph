@@ -4,6 +4,7 @@ import sys
 import json
 import os
 import shutil
+import stat
 
 def install_include_file(src_filename, dest_filename):
 	print('Installing %s to %s'%(src_filename, dest_filename))
@@ -71,6 +72,7 @@ def install_application(target_dir, specfile_name, destdir):
 	except FileExistsError:
 		pass
 	shutil.copyfile(src_file_name, dest_file_name)
+	os.chmod(dest_file_name, 0o755)
 	return 0
 
 def install_data(target_dir, specfile_name, destdir):
