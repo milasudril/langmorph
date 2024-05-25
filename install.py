@@ -35,6 +35,20 @@ def install_library(target_dir, specfile_name, destdir):
 	print('Installing %s to %s'%(src_file_name, dest_file_name))
 	os.makedirs(libdir)
 	shutil.copyfile(src_file_name, dest_file_name)
+
+	pkgconfig_dir = libdir + '/pkgconfig'
+	os.makedirs(pkgconfig_dir)
+	with open(pkgconfig_dir + '/langmorph.pc', 'w') as f:
+		f.write(
+			'''Name: Langmorph
+Description: A word generator library
+Version: 0.1.0
+Requires: wad64
+Libs: -L%s -llangmorph
+Cflags: -I%s
+'''%(libdir, incdir)
+		)
+
 	return 0
 
 def install_application(target_dir, specfile_name, destdir):
